@@ -1,0 +1,3 @@
+[console_scripts]
+miniscot = scse.main.cli:main
+
