@@ -27,11 +27,11 @@ class SupplyChainEnvironment:
     #  'run parameters' to be specified directly in the profiles.
     # The trade-off is that profile values are not meant to change (per run).
     def __init__(self,
-                 profile = 'power_market',       # defines the set of modules to use, default to power_market for now
+                 profile = 'newsvendor_demo_profile',       # defines the set of modules to use
                  simulation_seed = 12345,   # controls randomness throughout simulation
                  start_date = '2019-01-01', # simulation start date
                  time_increment = 'daily',  # timestep increment
-                 time_horizon = 10,        # timestep horizon
+                 time_horizon = 100,        # timestep horizon
                  asin_selection = 1):       # how many / which asins to simulate
 
         self._program_start_time = time.time()
@@ -53,7 +53,6 @@ class SupplyChainEnvironment:
                          for class_name in profile_config['metrics']]
 
         # TODO For now, only a single metric module is supported.
-        # TODO CLP -- might be worth adding more metrics here
         if len(self._metrics) != 1:
             raise ValueError("miniSCOT supports only a single metric. " +
                              "{} were specified.".format(len(self._metrics)))
@@ -91,11 +90,6 @@ class SupplyChainEnvironment:
         # the (dynamic) state. As the initial state may depend on info from the
         # context, we first collect the latter and then collect the former
         # (passing the latter as argument).
-
-        # CLP state needs to include the consumer demand at each timestep. Each supplier should contribute some supply
-        # to the state then, as well as some bids for the next "round"
-
-        # CLP each env module can define its own state and context that the whole simulation has access to as seen below
         for module in self._modules:
             if isinstance(module, Env):
                 logger.debug("Getting context from Env: {}.".format(
@@ -150,32 +144,32 @@ class SupplyChainEnvironment:
     def step(self, state, actions):
         # TODO we should clone the state to make clear that it must NOT be
         # modified by the modules directly. Not sure yet if info should likewise be immutable.
-        state = self._transfer_shipments(state) # CLP what does this do? seems specific to certain questions
+        state = self._transfer_shipments(state)
         timestep_reward = 0
-        timestep_reward_by_asin = None # CLP {k:0 for k in self._context['asin_list']}
+        timestep_reward_by_asin = {k:0 for k in self._context['asin_list']}
         for module in self._modules:
             if isinstance(module, Agent):
                 module_start_time = time.time()
                 logger.debug("Getting actions from Agent: {}." .format(module.get_name()))
-                actions.extend(module.compute_actions(state)) # compute actions given the current state should compute the bids for the next round
+                actions.extend(module.compute_actions(state))
                 module_end_time = time.time()
                 self._miniscot_time_profile[module.get_name()+" compute_actions"] += module_end_time - module_start_time
                 
                 miniscot_execute_actions_start_time = time.time()
-                state, actions, reward = self._execute_actions(actions, state) # not exactly sure what will go in execute actions here, except it should calculate reward from the current round
+                state, actions, reward = self._execute_actions(actions, state)
                 miniscot_execute_actions_end_time = time.time()
                 self._miniscot_time_profile["miniscot_action_execution"] += miniscot_execute_actions_end_time - miniscot_execute_actions_start_time
 
                 timestep_reward_by_asin = {k: timestep_reward_by_asin.get(k, 0) + reward['by_asin'].get(k, 0) for k in set(timestep_reward_by_asin)}
                 timestep_reward += reward['total']
 
-        # Invariant: only the following statements below are allowed to update the state. - CLP this means execute actions does not update
+        # Invariant: only the following statements below are allowed to update the state.
 
         # Actions will typically create entities in the state space.
         # Next, we must update these entities to account for the movement of time.
         # When we are done, the clock is updated to the next time-step.
         miniscot_advance_time_start_time = time.time()
-        state, reward = self._advance_time(state) # CLP so this is what should update state values?
+        state, reward = self._advance_time(state)
         miniscot_advance_time_end_time = time.time()
         self._miniscot_time_profile["miniscot_advance_time"] += miniscot_advance_time_end_time - miniscot_advance_time_start_time
         if state['clock'] == self._time_horizon:
@@ -214,17 +208,13 @@ class SupplyChainEnvironment:
         for action in actions:
             if action['quantity'] < 0:
                 raise ValueError ("Action quantity is negative, which is not possible!")
-            #if isinstance(action['quantity'], int) == False: # CLP - this rule may need to change depending on rules we define.
-            #    raise ValueError ("Action quantity is not integer, which is not possible!")
+            if isinstance(action['quantity'], int) == False:
+                raise ValueError ("Action quantity is not integer, which is not possible!")
             if action['schedule'] <= state['clock']:
-                if action['type'] =='bid':
-                    state = self._add_bid(state,action)
-                elif action['type'] == 'market_demand':
-                    state = self._update_demand(state,action)
-                elif action['type'] in ['purchase_order', 'customer_order']:
+                if action['type'] in ['purchase_order', 'customer_order']:
                     state = self._create_order_entity(state, action)
                 # we only compute rewards upon executing complete action forms
-                elif action['type'] in ['inbound_shipment', 'outbound_shipment', 'transfer']: # may need to create new action types
+                elif action['type'] in ['inbound_shipment', 'outbound_shipment', 'transfer']:
                     state = self._create_shipment_entity(state, action)
                     metrics_start_time = time.time()
                     action_reward = self._metrics.compute_reward(state, action)
@@ -248,7 +238,7 @@ class SupplyChainEnvironment:
         # Right now, the only time processing we need to do is with shipments.
         reward = 0
         action = {"type": "advance_time", "asin": None, "quantity": None}
-        reward = self._metrics.compute_reward(state, action) # I think reward should be computed in this stage so order doesn't matter
+        reward = self._metrics.compute_reward(state, action)
         state['clock'] += 1
         logger.debug('clock: {}'.format(state['clock']))
         if self._time_increment == 'daily':
@@ -259,27 +249,6 @@ class SupplyChainEnvironment:
             raise ValueError("Unknown time increment arg".format(self._time_increment))
 
         return state, reward
-
-    def _add_bid(self, state, action):
-        # what this really needs to do is add all the bids and stuff to the state, and then 
-                    # compute rewards. I THINK that's all it really has to do, but not certain
-                    # 1. aggregate bids for guaranteed and backup
-                    # 2. also track everything for bidder 1 (to calculate profit for)
-        # note that each round, need to make sure to reset all these quantities
-        if action['bid_type'] == 'guaranteed':
-            state['total_guaranteed'].append((action['quantity'],action['price']))
-        elif action['bid_type'] == 'backup':
-            state['total_backup'].append((action['quantity'],action['price']))
-        if action['bidder'] == 1:
-            if action['bid_type'] == 'guaranteed':
-                state['firm_guaranteed'].append((action['quantity'],action['price']))
-            elif action['bid_type'] == 'backup':
-                state['firm_backup'].append((action['quantity'],action['price']))
-        return None
-
-    def _update_demand(self, state, action):
-        state['demand'] = action['quantity']# pretty sure that's all I need to do
-        return state
 
     def _create_order_entity(self, state, action):
         # semantically, individual actions are singular (order, shipment), state semantics are plural (orders, shipments)
