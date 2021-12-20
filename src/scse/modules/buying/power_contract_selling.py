@@ -6,17 +6,18 @@ import logging
 logger = logging.getLogger(__name__)
 DEFAULT_GUARANTEED_PRICE = 10
 DEFAULT_BACKUP_PRICE = 5
+DEFAULT_CAPACITY = 10
 class SimpleFlexibleFirm(Agent):
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
-        self.capacity = run_parameters['firm_capacity']
+        self.capacity = DEFAULT_CAPACITY
         
     def get_name(self):
         return 'selling_contracts'
     
     def reset(self, context, state):
-        self._asin_list = context['asin_list']
+        return None
         # again, not sure what belongs in here
     
     def compute_actions(self, state):

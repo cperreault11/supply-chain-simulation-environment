@@ -38,7 +38,7 @@ def load_profile(profile_configuration):
 def instantiate_class(full_class_name, **parameters):
     last_dot = full_class_name.rindex('.')
     module_name = full_class_name[:last_dot]
-    #logger.debug("module_name is {}".format(module_name))
+    logger.debug("module_name is {}".format(module_name))
     class_name = full_class_name[last_dot + 1:]
 
     module = importlib.import_module(module_name)

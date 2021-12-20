@@ -17,7 +17,8 @@ class SimpleRestOfMarket(Agent):
         return 'market_selling_contracts'
 
     def reset(self, context, state):
-        self._asin_list = context['asin_list']
+        return None
+        #self._asin_list = context['asin_list']
         # again, not sure
 
     def compute_actions(self, state):

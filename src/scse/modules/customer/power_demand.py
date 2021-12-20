@@ -9,7 +9,7 @@ class NormalPowerDemand(Agent):
     MEAN = 30
     VAR = 5 # could set these with run params if we want
 
-    def __init(self, run_parameters):
+    def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         # not sure if I need anything else here?
@@ -18,8 +18,9 @@ class NormalPowerDemand(Agent):
         return 'demand_generator'
 
     def reset(self,context,state):
+        return None
         # this may be unnecessary
-        self._asin_list = context['asin_list']
+        #self._asin_list = context['asin_list']
 
     def compute_actions(self, state):
         actions = []

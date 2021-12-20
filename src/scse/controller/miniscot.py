@@ -150,7 +150,7 @@ class SupplyChainEnvironment:
     def step(self, state, actions):
         # TODO we should clone the state to make clear that it must NOT be
         # modified by the modules directly. Not sure yet if info should likewise be immutable.
-        state = self._transfer_shipments(state) # CLP what does this do? seems specific to certain questions
+        #state = self._transfer_shipments(state) # CLP what does this do? seems specific to certain questions
         timestep_reward = 0
         timestep_reward_by_asin = None # CLP {k:0 for k in self._context['asin_list']}
         for module in self._modules:
@@ -166,7 +166,7 @@ class SupplyChainEnvironment:
                 miniscot_execute_actions_end_time = time.time()
                 self._miniscot_time_profile["miniscot_action_execution"] += miniscot_execute_actions_end_time - miniscot_execute_actions_start_time
 
-                timestep_reward_by_asin = {k: timestep_reward_by_asin.get(k, 0) + reward['by_asin'].get(k, 0) for k in set(timestep_reward_by_asin)}
+                #timestep_reward_by_asin = {k: timestep_reward_by_asin.get(k, 0) + reward['by_asin'].get(k, 0) for k in set(timestep_reward_by_asin)}
                 timestep_reward += reward['total']
 
         # Invariant: only the following statements below are allowed to update the state. - CLP this means execute actions does not update
@@ -188,7 +188,7 @@ class SupplyChainEnvironment:
 
 
         timestep_reward += reward['total']
-        timestep_reward_by_asin = {k: timestep_reward_by_asin.get(k, 0) + reward['by_asin'].get(k, 0) for k in set(timestep_reward_by_asin)}
+        #timestep_reward_by_asin = {k: timestep_reward_by_asin.get(k, 0) + reward['by_asin'].get(k, 0) for k in set(timestep_reward_by_asin)}
         self.episode_reward += timestep_reward
         
         logger.info(red("timestep is = " + str(state['clock'])))
@@ -201,7 +201,7 @@ class SupplyChainEnvironment:
         rewards["episode_reward"] = {}
 
         rewards["timestep_reward"]["total"] = timestep_reward
-        rewards["timestep_reward"]["by_asin"] = timestep_reward_by_asin
+        #rewards["timestep_reward"]["by_asin"] = timestep_reward_by_asin
         rewards["episode_reward"]["total"] = self.episode_reward
 
         return state, actions, rewards
@@ -210,7 +210,7 @@ class SupplyChainEnvironment:
         # Execute all completed actions that are scheduled for this timestep
         unexecuted_actions = []
         reward = 0
-        reward_by_asin = {k:0 for k in self._context['asin_list']}
+        #reward_by_asin = {k:0 for k in self._context['asin_list']}
         for action in actions:
             if action['quantity'] < 0:
                 raise ValueError ("Action quantity is negative, which is not possible!")
@@ -231,7 +231,7 @@ class SupplyChainEnvironment:
                     metrics_end_time = time.time()
                     self._miniscot_time_profile["miniscot_metrics_time"] += metrics_end_time - metrics_start_time
                     reward += action_reward
-                    reward_by_asin[action['asin']] += action_reward
+                    #reward_by_asin[action['asin']] += action_reward
                 else:
                     raise ValueError("Unknown action type ".format(action['type']))
             else:
@@ -240,7 +240,7 @@ class SupplyChainEnvironment:
         # this allows us to return rewards by asin, instead of just total reward
         rewards = {}
         rewards["total"] = reward
-        rewards["by_asin"] = reward_by_asin
+        #rewards["by_asin"] = reward_by_asin
 
         return state, unexecuted_actions, rewards
 
@@ -275,7 +275,7 @@ class SupplyChainEnvironment:
                 state['firm_guaranteed'].append((action['quantity'],action['price']))
             elif action['bid_type'] == 'backup':
                 state['firm_backup'].append((action['quantity'],action['price']))
-        return None
+        return state
 
     def _update_demand(self, state, action):
         state['demand'] = action['quantity']# pretty sure that's all I need to do
