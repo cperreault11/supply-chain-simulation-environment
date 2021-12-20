@@ -7,7 +7,7 @@ class miniSCOTnotebook():
     DEFAULT_HORIZON = 100
     DEFAULT_SIMULATION_SEED = 12345
     DEFAULT_ASIN_SELECTION = 1
-    DEFAULT_PROFILE = 'power_market'
+    DEFAULT_PROFILE = 'newsvendor_demo_profile'
 
     def __init__(self):
         self.start(simulation_seed=self.DEFAULT_SIMULATION_SEED,

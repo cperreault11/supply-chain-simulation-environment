@@ -1,4 +1,6 @@
+LICENSE
 MANIFEST.in
+NOTICE
 README.md
 setup.cfg
 setup.py
@@ -45,9 +47,3 @@ src/scse/profiles/power_supply.json
 src/scse/profiles/profile.py
 src/scse/services/__init__.py
 src/scse/services/service_registry.py
-src/scse/utils/__init__.py
-src/scse/utils/aws.py
-src/scse/utils/docker.py
-src/scse/utils/output_log_parser.py
-src/scse/utils/printer.py
-src/scse/utils/uuid.py
