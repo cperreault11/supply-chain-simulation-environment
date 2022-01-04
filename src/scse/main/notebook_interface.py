@@ -8,6 +8,10 @@ class miniSCOTnotebook():
     DEFAULT_SIMULATION_SEED = 12345
     DEFAULT_ASIN_SELECTION = 1
     DEFAULT_PROFILE = 'newsvendor_demo_profile'
+    DEFAULT_FLEXIBLE_CAPACITY = 10
+    DEFAULT_STATIC_CAPACITY = 10
+    DEFAULT_VARIABLE_CAPACITY = 10
+    DEFAULT_MEAN_DEMAND = 25
 
     def __init__(self):
         self.start(simulation_seed=self.DEFAULT_SIMULATION_SEED,
@@ -15,6 +19,10 @@ class miniSCOTnotebook():
                    time_increment=self.DEFAULT_TIME_INCREMENT,
                    time_horizon=self.DEFAULT_HORIZON,
                    asin_selection=self.DEFAULT_ASIN_SELECTION,
+                   flexible_capacity = self.DEFAULT_FLEXIBLE_CAPACITY,
+                   variable_capacity = self.DEFAULT_VARIABLE_CAPACITY,
+                   static_capacity = self.DEFAULT_STATIC_CAPACITY,
+                   mean_demand = self.DEFAULT_MEAN_DEMAND,
                    profile=self.DEFAULT_PROFILE)
 
     def start(self, **run_parameters):

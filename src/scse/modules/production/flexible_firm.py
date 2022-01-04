@@ -3,18 +3,24 @@ import numpy as np
 import scipy.stats
 import logging
 
+
 logger = logging.getLogger(__name__)
-DEFAULT_GUARANTEED_PRICE = 10
-DEFAULT_BACKUP_PRICE = 5
-DEFAULT_CAPACITY = 10
-class SimpleFlexibleFirm(Agent):
+
+class FlexibleFirm(Agent):
+    """
+    Flexible firm, like a natural gas company
+    """
+    DEFAULT_GUARANTEED_PRICE = 10
+    DEFAULT_BACKUP_PRICE = 5
+    DEFAULT_RAMP_UP_COST = 20
+    DEFAULT_COST_PER_UNIT = 6
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
-        self.capacity = DEFAULT_CAPACITY
+        self.capacity = run_parameters['flexible_capacity']
         
     def get_name(self):
-        return 'selling_contracts'
+        return 'flexible_firm'
     
     def reset(self, context, state):
         return None
@@ -48,7 +54,7 @@ class SimpleFlexibleFirm(Agent):
         action1 = {
             'type': 'bid',
             'bid_type': 'guaranteed',
-            'price': DEFAULT_GUARANTEED_PRICE,
+            'price': self.DEFAULT_GUARANTEED_PRICE,
             'quantity': guaranteed_power * self.capacity,
             'schedule': current_clock,
             'bidder': 1 # 1 is bidder of interest
@@ -56,10 +62,13 @@ class SimpleFlexibleFirm(Agent):
         action2 = {
             'type': 'bid',
             'bid_type': 'backup',
-            'price': DEFAULT_BACKUP_PRICE,
+            'price': self.DEFAULT_BACKUP_PRICE,
             'quantity': backup_power * self.capacity,
             'schedule': current_clock,
-            'bidder': 1
+            'bidder': 'flexible',
+            'price_if_used': self.DEFAULT_GUARANTEED_PRICE,
+            'rampup_cost': self.DEFAULT_RAMP_UP_COST,
+            'cost_pu': self.DEFAULT_COST_PER_UNIT
         }
         actions = [action1, action2]
         return actions

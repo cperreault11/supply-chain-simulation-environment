@@ -2,9 +2,10 @@
     "name": "power_supply",
     "description": "Environment for power supply market",
     "modules": [
-      "scse.modules.buying.power_contract_selling.SimpleFlexibleFirm",
-      "scse.modules.buying.power_rest_of_market.SimpleRestOfMarket",
-      "scse.modules.customer.power_demand.NormalPowerDemand"
+      "scse.modules.production.flexible_firm.FlexibleFirm",
+      "scse.modules.production.static_firm.StaticFirm",
+      "scse.modules.production.variable_firm.VariableFirm",
+      "scse.modules.demand.power_demand.NormalPowerDemand"
     ],
     "metrics": ["scse.metrics.power_contract_profit.ProfitCalculations"]
   }

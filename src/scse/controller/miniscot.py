@@ -208,12 +208,16 @@ class SupplyChainEnvironment:
         for action in actions:
             if action['quantity'] < 0:
                 raise ValueError ("Action quantity is negative, which is not possible!")
-            if isinstance(action['quantity'], int) == False:
-                raise ValueError ("Action quantity is not integer, which is not possible!")
+            #if isinstance(action['quantity'], int) == False:
+            #    raise ValueError ("Action quantity is not integer, which is not possible!")
             if action['schedule'] <= state['clock']:
                 if action['type'] in ['purchase_order', 'customer_order']:
                     state = self._create_order_entity(state, action)
                 # we only compute rewards upon executing complete action forms
+                elif action['type'] == 'market_demand':
+                    state = self._update_demand(state,action)
+                elif action['type'] == 'bid':
+                    state = self._add_bid(state,action)
                 elif action['type'] in ['inbound_shipment', 'outbound_shipment', 'transfer']:
                     state = self._create_shipment_entity(state, action)
                     metrics_start_time = time.time()
@@ -251,24 +255,19 @@ class SupplyChainEnvironment:
         return state, reward
 
     def _add_bid(self, state, action):
-        # what this really needs to do is add all the bids and stuff to the state, and then 
-                    # compute rewards. I THINK that's all it really has to do, but not certain
-                    # 1. aggregate bids for guaranteed and backup
-                    # 2. also track everything for bidder 1 (to calculate profit for)
-        # note that each round, need to make sure to reset all these quantities
         if action['bid_type'] == 'guaranteed':
-            state['total_guaranteed'].append((action['quantity'],action['price']))
+            state['guaranteed'].append((action['quantity'],action['cost_pu'],action['price'],action['bidder']))
         elif action['bid_type'] == 'backup':
-            state['total_backup'].append((action['quantity'],action['price']))
-        if action['bidder'] == 1:
-            if action['bid_type'] == 'guaranteed':
-                state['firm_guaranteed'].append((action['quantity'],action['price']))
-            elif action['bid_type'] == 'backup':
-                state['firm_backup'].append((action['quantity'],action['price']))
+            state['backup'].append((action['quantity'],action['cost_pu'],action['price'],action['bidder'],action['rampup_cost'], action['price_if_used']))
+        # if action['bidder'] == 1:
+        #     if action['bid_type'] == 'guaranteed':
+        #         state['firm_guaranteed'].append((action['quantity'],action['price']))
+        #     elif action['bid_type'] == 'backup':
+        #         state['firm_backup'].append((action['quantity'],action['price']))
         return state
 
     def _update_demand(self, state, action):
-        state['demand'] = action['quantity']# pretty sure that's all I need to do
+        state['demand'] = action['quantity']
         return state
 
     def _create_order_entity(self, state, action):

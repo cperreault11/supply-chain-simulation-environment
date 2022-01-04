@@ -12,7 +12,11 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
     _DEFAULT_HORIZON = 100
     _DEFAULT_SIMULATION_SEED = 12345
     _DEFAULT_ASIN_SELECTION = 1 # or use an integer value to select the number of asins
-    _DEFAULT_PROFILE = 'newsvendor_demo_profile'
+    _DEFAULT_PROFILE = 'power_supply'
+    _DEFAULT_FLEXIBLE_CAPACITY = 10
+    _DEFAULT_STATIC_CAPACITY = 10
+    _DEFAULT_VARIABLE_CAPACITY = 10
+    _DEFAULT_MEAN_DEMAND = 25
 
     def __init__(self, **args):
         super().__init__(args)
@@ -23,6 +27,10 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     time_increment = self._DEFAULT_TIME_INCREMENT,
                     time_horizon = self._DEFAULT_HORIZON,
                     asin_selection = self._DEFAULT_ASIN_SELECTION,
+                    flexible_capacity = self._DEFAULT_FLEXIBLE_CAPACITY,
+                    variable_capacity = self._DEFAULT_VARIABLE_CAPACITY,
+                    static_capacity = self._DEFAULT_STATIC_CAPACITY,
+                    mean_demand = self._DEFAULT_MEAN_DEMAND,
                     profile = self._DEFAULT_PROFILE)
 
         self._set_prompt()
@@ -51,6 +59,11 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
     param_parser.add_argument('-seed', help="simulation random seed (default 12345)", type=int, default=_DEFAULT_SIMULATION_SEED)
     param_parser.add_argument('-asin_selection', help="number of ASINs to use (default 10)", type=int, default=_DEFAULT_ASIN_SELECTION)
     param_parser.add_argument('-profile', help="profile (default minimal)", type=str, default=_DEFAULT_PROFILE)
+    param_parser.add_argument('-flexible_capacity', help="capacity of the flexible power producers", type=int, default=_DEFAULT_FLEXIBLE_CAPACITY)
+    param_parser.add_argument('-static_capacity', help="capacity of the static power producers", type=int, default=_DEFAULT_STATIC_CAPACITY)
+    param_parser.add_argument('-variable_capacity', help="capacity of the variable power producers", type=int, default=_DEFAULT_VARIABLE_CAPACITY)
+    param_parser.add_argument('-mean_demand', help="average demand in this market", type=int, default=_DEFAULT_MEAN_DEMAND)
+
     #param_parser.add_argument('-asin', help="list of ASINs.", action='append', default=_DEFAULT_ASIN_LIST)
 
     @cmd2.with_argparser(param_parser)
@@ -61,6 +74,10 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     time_increment = args.time_increment,
                     time_horizon = args.horizon,
                     asin_selection = args.asin_selection,
+                    flexible_capacity = args.flexible_capacity,
+                    static_capacity = args.static_capacity,
+                    variable_capacity = args.variable_capacity,
+                    mean_demand = args.mean_demand,
                     profile = args.profile)
 
     def do_next(self, arguments):
