@@ -12,6 +12,8 @@ class ProfitCalculations():
         # state['total_backup'] = []
     
     def compute_reward(self, state,action):
+        #### TODO: summarize the pricing decisions here
+        #### note that these are initial choices, market structure can change if that is useful.
         reward = 0
         if action['type'] == 'advance_time':
              # first calculate which bids are accepted
