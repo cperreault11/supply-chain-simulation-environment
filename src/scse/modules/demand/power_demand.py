@@ -19,20 +19,17 @@ class NormalPowerDemand(Agent):
 
     def reset(self,context,state):
         return None
-        # this may be unnecessary
-        #self._asin_list = context['asin_list']
 
     def compute_actions(self, state):
         actions = []
         x = self._rng.rand()
         # truncated normal, can't have negative demand
         demand =  self.mean + scipy.stats.norm.ppf(1 - x * (1 - scipy.stats.norm.cdf(-self.mean/self.var))) # TODO: switch to truncnorm
-        action = {
+        action = { # most of these are unnecessary fillers leftover from newsvendor demo
             'type': 'market_demand',
-            # everything is tracked by asin, we only have a single 'product'
             'asin': 1,
             'origin': None,
-            'destination': None, # Not sure what this needs to be
+            'destination': None,
             'quantity': demand,
             'schedule': state['clock']
         }

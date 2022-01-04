@@ -18,8 +18,6 @@ class SimpleRestOfMarket(Agent):
 
     def reset(self, context, state):
         return None
-        #self._asin_list = context['asin_list']
-        # again, not sure
 
     def compute_actions(self, state):
         # compute the "guaranteed supply"-- whatever other firms bid

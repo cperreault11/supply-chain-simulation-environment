@@ -272,11 +272,7 @@ class SupplyChainEnvironment:
             state['guaranteed'].append((action['quantity'],action['cost_pu'],action['price'],action['bidder']))
         elif action['bid_type'] == 'backup':
             state['backup'].append((action['quantity'],action['cost_pu'],action['price'],action['bidder'],action['rampup_cost'], action['price_if_used']))
-        # if action['bidder'] == 1:
-        #     if action['bid_type'] == 'guaranteed':
-        #         state['firm_guaranteed'].append((action['quantity'],action['price']))
-        #     elif action['bid_type'] == 'backup':
-        #         state['firm_backup'].append((action['quantity'],action['price']))
+
         return state
 
     def _update_demand(self, state, action):
