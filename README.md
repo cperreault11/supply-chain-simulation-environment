@@ -6,20 +6,22 @@ architecture and algorithms at any level of fidelity. The system allows users to
 the open-source Python codebase allows easy development of new components and
 baselines.
 
-## Documentation
 
-Generated documentation for the latest released version can be accessed here:
-TODO for opensource
+This version is edited for power supply simulations
 
-### Plain-old-python-setup.py
+* Use linux/WSL 
 
-* Clone the git repository (e.g. `git clone TODO FOR OPENSOURCE)
+* Create a virtualenv with Python 3.7 and activate it
+
+* Clone the git repository 
 
 * Build a source distribution:
 - `python setup.py sdist`
 
 * Install:
 - `python setup.py install`
+
+* pip install .
 
 * Switch to develop mode (recommended):
 - `python setup.py develop`
