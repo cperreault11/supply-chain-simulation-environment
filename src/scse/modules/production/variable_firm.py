@@ -25,12 +25,13 @@ class VariableFirm(Agent):
     def get_power_produced(self,state):
         mean = .5 * self.capacity
         var = .3 * self.capacity
-        return scipy.stats.truncnorm((0 - mean) / var, (self.capacity - mean) / var, loc=mean, scale=var)
+        sample = self._rng.rand()
+        return scipy.stats.truncnorm((0 - mean) / var, (self.capacity - mean) / var, loc=mean, scale=var).ppf(sample)
 
 
     def compute_actions(self, state):
         current_clock = state['clock']
-        power_produced = self.get_power_produced(state)
+        power_produced = int(self.get_power_produced(state))
         action = {
             'type': 'bid',
             'bid_type': 'guaranteed',
@@ -40,5 +41,6 @@ class VariableFirm(Agent):
             'bidder': 'variable',
             'cost_pu': self.DEFAULT_COST_PER_UNIT
         }
+        logger.debug("variable firm produced {} units of power".format(power_produced))
         actions = [action]
         return actions

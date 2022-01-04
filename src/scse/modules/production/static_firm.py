@@ -35,5 +35,6 @@ class StaticFirm(Agent):
             'bidder': 'static',
             'cost_pu': self.DEFAULT_COST_PER_UNIT
         }
+        logger.debug("static firm produced {} units of power".format(produce * self.capacity))
         actions = [action]
         return actions

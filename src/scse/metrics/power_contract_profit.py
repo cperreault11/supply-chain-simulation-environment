@@ -60,10 +60,10 @@ class ProfitCalculations():
                 standard_bought.append((quantity, offer[1], offer[2], offer[3])) # quantity, price, cost, producer
                 if remaining_demand == 0:
                     break
+            backup_options = sorted(state['backup'].copy(), key=lambda x: x[1])
             if remaining_demand > 0:
                 # backup required = remaining demand
                 # just need to figure out the difference between profit and consumer cost when we hit backup power
-                backup_options = sorted(state['backup'].copy(), key=lambda x: x[1])
                 for offer in backup_options:
                     quantity = max(0,min(remaining_demand, offer[0]))
                     remaining_demand -= quantity
@@ -71,6 +71,7 @@ class ProfitCalculations():
                     if remaining_demand == 0:
                         break
             logger.debug("remaining demand: {}".format(remaining_demand))
+            logger.debug("standard power bought: {}".format(sum(x[0] for x in standard_bought)))
             profit_by_producer = {}
             avg_cost = 0
             for producer in ['flexible', 'static','variable']:
@@ -79,12 +80,15 @@ class ProfitCalculations():
             # assuming that all backup power offered is bought for now, it might make sense to buy enough backup power for 
             # 99% chance of no outage
             backup_used_total = sum(x[0] for x in backup_bought)
-            if backup_used_total > 0 and len(backup_options > 0): # for now, there is only one firm that can produce backup options, so no looping
+            logger.debug("backup power used: {} ".format(backup_used_total))
+            if backup_used_total > 0 and len(backup_options) > 0: # for now, there is only one firm that can produce backup options, so no looping
                 # sum this way
                 profit_by_producer['flexible'] += backup_used_total * (backup_options[0][5] - backup_options[0][2]) - backup_options[0][4] + (backup_options[0][0] - backup_used_total) * backup_options[0][1]
             else:
                 profit_by_producer['flexible'] += backup_options[0][0] * backup_options[0][1]
 
             avg_cost = (sum(x[0] * x[1] for x in standard_bought) + backup_options[0][1] * (backup_options[0][0] - backup_used_total)* backup_options[0][1] + backup_used_total * backup_options[0][5]) /demand
+            state['guaranteed'] = []
+            state['backup'] = []
             return {'total':profit_by_producer['flexible'],
                 'by_asin':None}

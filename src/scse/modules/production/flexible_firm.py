@@ -57,7 +57,8 @@ class FlexibleFirm(Agent):
             'price': self.DEFAULT_GUARANTEED_PRICE,
             'quantity': guaranteed_power * self.capacity,
             'schedule': current_clock,
-            'bidder': 1 # 1 is bidder of interest
+            'bidder': 'flexible', # 1 is bidder of interest,
+            'cost_pu': self.DEFAULT_COST_PER_UNIT
         }
         action2 = {
             'type': 'bid',
@@ -70,5 +71,6 @@ class FlexibleFirm(Agent):
             'rampup_cost': self.DEFAULT_RAMP_UP_COST,
             'cost_pu': self.DEFAULT_COST_PER_UNIT
         }
+        logger.debug("flexible firm offers {} units of standard power and {} units of backup power".format(guaranteed_power* self.capacity, backup_power* self.capacity))
         actions = [action1, action2]
         return actions

@@ -32,7 +32,12 @@ class SupplyChainEnvironment:
                  start_date = '2019-01-01', # simulation start date
                  time_increment = 'daily',  # timestep increment
                  time_horizon = 100,        # timestep horizon
-                 asin_selection = 1):       # how many / which asins to simulate
+                 asin_selection = 1,# how many / which asins to simulate
+                 flexible_capacity = 10,
+                 static_capacity = 10,
+                 variable_capacity = 10,
+                 mean_demand = 25
+                 ):       
 
         self._program_start_time = time.time()
         self._miniscot_time_profile = {}
@@ -49,7 +54,11 @@ class SupplyChainEnvironment:
                                            start_date = start_date,
                                            time_increment = time_increment,
                                            time_horizon = time_horizon,
-                                           asin_selection = asin_selection)
+                                           asin_selection = asin_selection,
+                                           flexible_capacity = flexible_capacity,
+                                           static_capacity = static_capacity,
+                                           variable_capacity = variable_capacity,
+                                           mean_demand = mean_demand)
                          for class_name in profile_config['metrics']]
 
         # TODO For now, only a single metric module is supported.
@@ -63,7 +72,11 @@ class SupplyChainEnvironment:
                                            start_date = start_date,
                                            time_increment = time_increment,
                                            time_horizon = time_horizon,
-                                           asin_selection = asin_selection)
+                                           asin_selection = asin_selection,
+                                           flexible_capacity = flexible_capacity,
+                                           static_capacity = static_capacity,
+                                           variable_capacity = variable_capacity,
+                                           mean_demand = mean_demand)
                          for class_name in profile_config['modules']]
 
         current_program_time = time.time()
@@ -146,7 +159,7 @@ class SupplyChainEnvironment:
         # modified by the modules directly. Not sure yet if info should likewise be immutable.
         #state = self._transfer_shipments(state) # CLP what does this do? seems specific to certain questions
         timestep_reward = 0
-        timestep_reward_by_asin = {k:0 for k in self._context['asin_list']}
+        #timestep_reward_by_asin = {k:0 for k in self._context['asin_list']}
         for module in self._modules:
             if isinstance(module, Agent):
                 module_start_time = time.time()
