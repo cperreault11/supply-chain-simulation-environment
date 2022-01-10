@@ -1,4 +1,6 @@
 import logging
+import scipy.optimize
+import numpy as np
 logger = logging.getLogger(__name__)
 
 class ProfitCalculations():
@@ -6,8 +8,7 @@ class ProfitCalculations():
         self._time_horizon = run_parameters['time_horizon']
 
     def reset(self,context,state):
-        state['guaranteed'] = []
-        state['backup'] = []
+        state['bids'] = []
         # state['total_guaranteed'] = []
         # state['total_backup'] = []
     
@@ -16,48 +17,79 @@ class ProfitCalculations():
         #### note that these are initial choices, market structure can change if that is useful.
         reward = 0
         if action['type'] == 'advance_time':
-             # first calculate which bids are accepted
-            demand = state['demand']
-            remaining_demand = demand
-            standard_bought = [] # dict of producer id, profit
-            backup_bought = []
-            # preprocess the actions to get a set of potential purchases
-            guaranteed_options = sorted(state['guaranteed'].copy(), key = lambda x: x[1])
-            for offer in guaranteed_options:
-                quantity = max(0,min(remaining_demand, offer[0]))
-                remaining_demand -= quantity
-                standard_bought.append((quantity, offer[1], offer[2], offer[3])) # quantity, price, cost, producer
-                if remaining_demand == 0:
-                    break
-            backup_options = sorted(state['backup'].copy(), key=lambda x: x[1])
-            if remaining_demand > 0:
-                # backup required = remaining demand
-                # just need to figure out the difference between profit and consumer cost when we hit backup power
-                for offer in backup_options:
-                    quantity = max(0,min(remaining_demand, offer[0]))
-                    remaining_demand -= quantity
-                    backup_bought.append((quantity, offer[1], offer[2], offer[3], offer[4], offer[5])) # quantity, price, cost, producer, rampup cost, price if used
-                    if remaining_demand == 0:
-                        break
-            logger.debug("remaining demand: {}".format(remaining_demand))
-            logger.debug("standard power bought: {}".format(sum(x[0] for x in standard_bought)))
+            true_demand = state['true_demand']
+            predicted_demand = state['predicted_demand']
+            backup_demand = state['backup_required']
+            # init potential metrics
             profit_by_producer = {}
-            avg_cost = 0
-            for producer in ['flexible', 'static','variable']:
-                profit_by_producer[producer] = sum(x[0]* (x[1] - x[2]) for x in standard_bought if x[3] == producer)
-            # backup profit
-            # assuming that all backup power offered is bought for now, it might make sense to buy enough backup power for 
-            # 99% chance of no outage
-            backup_used_total = sum(x[0] for x in backup_bought)
-            logger.debug("backup power used: {} ".format(backup_used_total))
-            if backup_used_total > 0 and len(backup_options) > 0: # for now, there is only one firm that can produce backup options, so no looping
-                # sum this way
-                profit_by_producer['flexible'] += backup_used_total * (backup_options[0][5] - backup_options[0][2]) - backup_options[0][4] + (backup_options[0][0] - backup_used_total) * backup_options[0][1]
-            else:
-                profit_by_producer['flexible'] += backup_options[0][0] * backup_options[0][1]
-
-            avg_cost = (sum(x[0] * x[1] for x in standard_bought) + backup_options[0][1] * (backup_options[0][0] - backup_used_total)* backup_options[0][1] + backup_used_total * backup_options[0][5]) /demand
-            state['guaranteed'] = []
-            state['backup'] = []
-            return {'total':profit_by_producer['flexible'],
+            cost = 0
+            # init lin programming variables
+            cons_mins = []
+            cons_maxs = []
+            cons_coeff = []
+            initial = []
+            bounds = []
+            predicted_remaining = predicted_demand
+            backup_remaining = backup_demand
+            for i,bid in enumerate(state['bids']):
+                quantity_guaranteed = min(bid['quantity'], predicted_remaining)
+                predicted_remaining -= quantity_guaranteed
+                initial.extend([bid['price_guaranteed'], quantity_guaranteed])
+                bounds.append((bid['price_guaranteed'],bid['price_guaranteed']))
+                bounds.append((0,bid['quantity']))
+                quantity_backup = max(0, min(bid['quantity'] - quantity_guaranteed, backup_remaining))
+                backup_remaining -= quantity_backup
+                initial.extend([bid['price_backup'],quantity_backup])
+                bounds.append((bid['price_backup'],bid['price_backup']))
+                bounds.append((0,bid['quantity']))
+                cons_mins.append(bid['price_guaranteed'])
+                cons_maxs.append(bid['price_guaranteed'])
+                cons_mins.append(bid['price_backup'])
+                cons_maxs.append(bid['price_backup'])
+                cons_mins.append(0)
+                cons_maxs.append(bid['quantity'])
+                cons_mins.append(0)
+                cons_maxs.append(bid['quantity'])
+                cons_mins.append(0)
+                cons_maxs.append(bid['quantity'])
+                c1 = np.zeros(4 * len(state['bids']))
+                c1[4 * i] = 1
+                c2 = np.zeros(4 * len(state['bids']))
+                c2[4 * i + 2] = 1
+                c3 = np.zeros(4 * len(state['bids']))
+                c3[4 * i + 1] = 1
+                c3[4 * i + 3] = 1
+                c4 = np.zeros(4 * len(state['bids']))
+                c4[4 * i + 1] = 1
+                c5 = np.zeros(4 * len(state['bids']))
+                c5[4 * i + 3] = 1
+                cons_coeff.extend([c1,c2,c3,c4,c5])
+            cons_mins.append(predicted_demand)
+            cons_maxs.append(predicted_demand)
+            cons_mins.append(backup_demand)
+            cons_maxs.append(backup_demand)
+            c1 = np.zeros(4 * len(state['bids']))
+            c2 = np.zeros(4 * len(state['bids']))
+            for i in range(len(state['bids'])):
+                c1[4 * i + 1] = 1
+                c2[4 * i + 3] = 1
+            cons_coeff.extend([c1,c2])
+            constraints = scipy.optimize.LinearConstraint(np.array(cons_coeff), np.array(cons_mins), np.array(cons_maxs))
+            t = scipy.optimize.minimize(self.equivalent_cost, initial, constraints=constraints, options={'maxiter': 100},method ="trust-constr") # check for success?
+            res = t.x
+            res[res < 1e-4] = 0
+            cost = self.total_cost(res)
+            logger.debug(res)
+            state['bids'] = []
+            return {'total':cost,
                 'by_asin':None}
+
+    def total_cost(self,bought):
+        """Objective function to be minimized when determining purchases to make"""
+        max_guaranteed = max((x for i,x in enumerate(bought) if i % 4 == 0 and bought[i+1] > 0),default=0)
+        max_backup = max((x for i,x in enumerate(bought) if i % 4 == 2 and bought[i+1] > 0),default=0)
+        return sum(x * max_guaranteed for i,x in enumerate(bought) if i % 4 == 1) + sum(x * max_backup for i,x in enumerate(bought) if i % 4 == 3)
+
+    def equivalent_cost(self, bought):
+        """will have an equivalent minimum with better gradients for optimization"""
+        return sum(bought[i] * bought[i+1] for i,x in enumerate(bought) if i % 2 == 0 and x!=np.inf and x!=np.nan)

@@ -33,9 +33,14 @@ class SupplyChainEnvironment:
                  time_increment = 'daily',  # timestep increment
                  time_horizon = 100,        # timestep horizon
                  asin_selection = 1,# how many / which asins to simulate
-                 flexible_capacity = 10,
-                 static_capacity = 10,
-                 variable_capacity = 10,
+                 flexible_capacity = 30,
+                 static_capacity = 20,
+                 variable_capacity = 20,
+                 spg = 7,
+                 spb = 7,
+                 fpg = 10,
+                 fpb = 5,
+                 vpg = 4,
                  mean_demand = 25
                  ):       
 
@@ -58,6 +63,11 @@ class SupplyChainEnvironment:
                                            flexible_capacity = flexible_capacity,
                                            static_capacity = static_capacity,
                                            variable_capacity = variable_capacity,
+                                           spg = spg,
+                                           spb = spb,
+                                           fpg = fpg,
+                                           fpb = fpb,
+                                           vpg = vpg,
                                            mean_demand = mean_demand)
                          for class_name in profile_config['metrics']]
 
@@ -76,7 +86,12 @@ class SupplyChainEnvironment:
                                            flexible_capacity = flexible_capacity,
                                            static_capacity = static_capacity,
                                            variable_capacity = variable_capacity,
-                                           mean_demand = mean_demand)
+                                           mean_demand = mean_demand,
+                                           spg = spg,
+                                           spb = spb,
+                                           fpg = fpg,
+                                           fpb = fpb,
+                                           vpg = vpg,)
                          for class_name in profile_config['modules']]
 
         current_program_time = time.time()
@@ -268,15 +283,13 @@ class SupplyChainEnvironment:
         return state, reward
 
     def _add_bid(self, state, action):
-        if action['bid_type'] == 'guaranteed':
-            state['guaranteed'].append((action['quantity'],action['cost_pu'],action['price'],action['bidder']))
-        elif action['bid_type'] == 'backup':
-            state['backup'].append((action['quantity'],action['cost_pu'],action['price'],action['bidder'],action['rampup_cost'], action['price_if_used']))
-
+        state['bids'].append(action) # leave organization to the metric calculations
         return state
 
     def _update_demand(self, state, action):
-        state['demand'] = action['quantity']
+        state['true_demand'] = action['quantity']
+        state['predicted_demand'] = action['predicted']
+        state['backup_required'] = action['backup']
         return state
 
     def _create_order_entity(self, state, action):

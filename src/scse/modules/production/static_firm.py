@@ -3,6 +3,8 @@ import numpy as np
 import scipy.stats
 import logging
 
+from scse.modules.buying.power_rest_of_market import DEFAULT_BACKUP_PRICE
+
 logger = logging.getLogger(__name__)
 
 class StaticFirm(Agent):
@@ -10,12 +12,15 @@ class StaticFirm(Agent):
     Static firm, like coal. High ramp up costs, cannot adjust
     production quantities well
     """
-    DEFAULT_GUARANTEED_PRICE = 7
+
+    DEFAULT_RAMP_UP_COST = 40
     DEFAULT_COST_PER_UNIT = 3
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         self.capacity = run_parameters['static_capacity']
+        self.guaranteed_price = run_parameters['spg']
+        self.backup_price = run_parameters['spb']
 
     def get_name(self):
         return 'static_firm'
@@ -25,16 +30,16 @@ class StaticFirm(Agent):
 
     def compute_actions(self, state):
         current_clock = state['clock']
-        produce = 1 # percentage of total capacity to produce at this timestep
         action = {
             'type': 'bid',
-            'bid_type': 'guaranteed',
-            'price': self.DEFAULT_GUARANTEED_PRICE,
-            'quantity': produce * self.capacity,
+            'price_guaranteed': self.guaranteed_price,
+            'price_backup': self.backup_price,
+            'quantity': self.capacity,
             'schedule': current_clock,
             'bidder': 'static',
-            'cost_pu': self.DEFAULT_COST_PER_UNIT
+            'cost_pu': self.DEFAULT_COST_PER_UNIT,
+            'ramup_cost': self.DEFAULT_RAMP_UP_COST,
         }
-        logger.debug("static firm produced {} units of power".format(produce * self.capacity))
+        #logger.debug("static firm produced {} units of power".format(produce * self.capacity))
         actions = [action]
         return actions

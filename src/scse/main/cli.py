@@ -13,10 +13,15 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
     _DEFAULT_SIMULATION_SEED = 12345
     _DEFAULT_ASIN_SELECTION = 1 # or use an integer value to select the number of asins
     _DEFAULT_PROFILE = 'power_supply'
-    _DEFAULT_FLEXIBLE_CAPACITY = 10
-    _DEFAULT_STATIC_CAPACITY = 10
-    _DEFAULT_VARIABLE_CAPACITY = 10
+    _DEFAULT_FLEXIBLE_CAPACITY = 30
+    _DEFAULT_STATIC_CAPACITY = 20
+    _DEFAULT_VARIABLE_CAPACITY = 20
     _DEFAULT_MEAN_DEMAND = 25
+    _DEFAULT_STATIC_PRICE_GUARANTEED = 7
+    _DEFAULT_STATIC_PRICE_BACKUP = 7
+    _DEFAULT_FLEXIBLE_PRICE_GUARANTEED = 10
+    _DEFAULT_FLEXIBLE_PRICE_BACKUP = 5
+    _DEFAULT_VARIABLE_PRICE_GUARANTEED = 4
 
     def __init__(self, **args):
         super().__init__(args)
@@ -31,7 +36,12 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     variable_capacity = self._DEFAULT_VARIABLE_CAPACITY,
                     static_capacity = self._DEFAULT_STATIC_CAPACITY,
                     mean_demand = self._DEFAULT_MEAN_DEMAND,
-                    profile = self._DEFAULT_PROFILE)
+                    profile = self._DEFAULT_PROFILE,
+                    spg = self._DEFAULT_STATIC_PRICE_GUARANTEED,
+                    spb = self._DEFAULT_STATIC_PRICE_BACKUP,
+                    fpg = self._DEFAULT_FLEXIBLE_PRICE_GUARANTEED,
+                    fpb =self._DEFAULT_FLEXIBLE_PRICE_BACKUP,
+                    vpg = self._DEFAULT_VARIABLE_PRICE_GUARANTEED)
 
         self._set_prompt()
 
@@ -42,7 +52,7 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
         self._set_prompt()
         return stop
 
-    def _start(self, **run_parameters):
+    def _start(self, **run_parameters):     
         self._horizon = run_parameters['time_horizon']
         self._actions = []
         self._breakpoints = []
@@ -63,6 +73,11 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
     param_parser.add_argument('-static_capacity', help="capacity of the static power producers", type=int, default=_DEFAULT_STATIC_CAPACITY)
     param_parser.add_argument('-variable_capacity', help="capacity of the variable power producers", type=int, default=_DEFAULT_VARIABLE_CAPACITY)
     param_parser.add_argument('-mean_demand', help="average demand in this market", type=int, default=_DEFAULT_MEAN_DEMAND)
+    param_parser.add_argument('-spg', help="static price guaranteed", type=int, default = _DEFAULT_STATIC_PRICE_GUARANTEED)
+    param_parser.add_argument('-spb', help="static price backup", type=int, default = _DEFAULT_STATIC_PRICE_BACKUP)
+    param_parser.add_argument('-fpg', help="flexible price guaranteed", type=int, default = _DEFAULT_FLEXIBLE_PRICE_GUARANTEED)
+    param_parser.add_argument('-fpb', help="flexible price backup", type=int, default = _DEFAULT_FLEXIBLE_PRICE_BACKUP)
+    param_parser.add_argument('-vpg', help="variable price guaranteed", type=int, default = _DEFAULT_VARIABLE_PRICE_GUARANTEED)
 
     #param_parser.add_argument('-asin', help="list of ASINs.", action='append', default=_DEFAULT_ASIN_LIST)
 
@@ -78,6 +93,11 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     static_capacity = args.static_capacity,
                     variable_capacity = args.variable_capacity,
                     mean_demand = args.mean_demand,
+                    spg = args.spg,
+                    spb = args.spb,
+                    fpg = args.fpg,
+                    fpb = args.fpb,
+                    vpg = args.vpg,
                     profile = args.profile)
 
     def do_next(self, arguments):

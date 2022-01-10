@@ -10,14 +10,14 @@ class FlexibleFirm(Agent):
     """
     Flexible firm, like a natural gas company
     """
-    DEFAULT_GUARANTEED_PRICE = 10
-    DEFAULT_BACKUP_PRICE = 5
     DEFAULT_RAMP_UP_COST = 20
     DEFAULT_COST_PER_UNIT = 6
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         self.capacity = run_parameters['flexible_capacity']
+        self.guaranteed_price = run_parameters['fpg']
+        self.backup_price = run_parameters['fpb']
         
     def get_name(self):
         return 'flexible_firm'
@@ -27,50 +27,21 @@ class FlexibleFirm(Agent):
         # again, not sure what belongs in here
     
     def compute_actions(self, state):
-        guaranteed_power = .5 # ratios
-        backup_power = .5
-        not_sold = 0
         current_clock = state['clock']
-        # might need to do one asin for each type of purchase, although
-        # that gets a little bit weird. Look further into the 
-        # 'settling' functions and see what othe types of 
-        # things I can add into the state.
-
-        # For now: fixed price. remaining supply is just a random 
-        # draw based on renewables, what's available, etc.
-        # that should be easy enough to test and modify in the future
-
-        # If I can get that working, set up a meeting with the others
-        # and discuss what type of experiments we actually want to setup
-        # and it should be easy to make the code modifications at that
-        # point 
-
-        # In this simplest model, it's assumed that someone else can cover
-        # up the backup supply as needed. It's not really important, it's 
-        # just how to get something up and running quickly
-
-        # the structure of these actions will depend on how I can make the 
-        # profit calculations, so I'll need to look at that.
-        action1 = {
+        # if we want to incorporate strategy to these bids, 'quantity' can 
+        # be set to the maximum that the firm is willing to sell at either
+        # guaranteed or backup power, set the other price to inf
+        action = {
             'type': 'bid',
-            'bid_type': 'guaranteed',
-            'price': self.DEFAULT_GUARANTEED_PRICE,
-            'quantity': guaranteed_power * self.capacity,
-            'schedule': current_clock,
-            'bidder': 'flexible', # 1 is bidder of interest,
-            'cost_pu': self.DEFAULT_COST_PER_UNIT
-        }
-        action2 = {
-            'type': 'bid',
-            'bid_type': 'backup',
-            'price': self.DEFAULT_BACKUP_PRICE,
-            'quantity': backup_power * self.capacity,
+            'price_guaranteed': self.guaranteed_price,
+            'price_backup': self.backup_price,
+            'quantity': self.capacity,
             'schedule': current_clock,
             'bidder': 'flexible',
-            'price_if_used': self.DEFAULT_GUARANTEED_PRICE,
             'rampup_cost': self.DEFAULT_RAMP_UP_COST,
             'cost_pu': self.DEFAULT_COST_PER_UNIT
         }
-        logger.debug("flexible firm offers {} units of standard power and {} units of backup power".format(guaranteed_power* self.capacity, backup_power* self.capacity))
-        actions = [action1, action2]
+#
+        #logger.debug("flexible firm offers {} units of standard power and {} units of backup power".format(guaranteed_power* self.capacity, backup_power* self.capacity))
+        actions = [action]
         return actions
