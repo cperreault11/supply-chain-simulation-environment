@@ -16,8 +16,7 @@ class FlexibleFirm(Agent):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         self.capacity = run_parameters['flexible_capacity']
-        self.guaranteed_price = run_parameters['fpg']
-        self.backup_price = run_parameters['fpb']
+        self.default_price = run_parameters['flexible_price']
         
     def get_name(self):
         return 'flexible_firm'
@@ -33,15 +32,12 @@ class FlexibleFirm(Agent):
         # guaranteed or backup power, set the other price to inf
         action = {
             'type': 'bid',
-            'price_guaranteed': self.guaranteed_price,
-            'price_backup': self.backup_price,
+            'price': self.default_price,
             'quantity': self.capacity,
             'schedule': current_clock,
             'bidder': 'flexible',
             'rampup_cost': self.DEFAULT_RAMP_UP_COST,
             'cost_pu': self.DEFAULT_COST_PER_UNIT
         }
-#
-        #logger.debug("flexible firm offers {} units of standard power and {} units of backup power".format(guaranteed_power* self.capacity, backup_power* self.capacity))
         actions = [action]
         return actions

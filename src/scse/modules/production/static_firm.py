@@ -19,8 +19,7 @@ class StaticFirm(Agent):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         self.capacity = run_parameters['static_capacity']
-        self.guaranteed_price = run_parameters['spg']
-        self.backup_price = run_parameters['spb']
+        self.default_price = run_parameters['static_price']
 
     def get_name(self):
         return 'static_firm'
@@ -32,8 +31,7 @@ class StaticFirm(Agent):
         current_clock = state['clock']
         action = {
             'type': 'bid',
-            'price_guaranteed': self.guaranteed_price,
-            'price_backup': self.backup_price,
+            'price': self.default_price,
             'quantity': self.capacity,
             'schedule': current_clock,
             'bidder': 'static',

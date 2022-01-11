@@ -14,7 +14,7 @@ class VariableFirm(Agent):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         self.capacity = run_parameters['variable_capacity']
-        self.guaranteed_price = run_parameters['vpg']
+        self.default_price = run_parameters['variable_price']
 
     def get_name(self):
         return 'variable_firm'
@@ -34,8 +34,7 @@ class VariableFirm(Agent):
         power_produced = int(self.get_power_produced(state))
         action = {
             'type': 'bid',
-            'price_guaranteed': self.guaranteed_price,
-            'price_backup': 100000, # high number so that backup power will not be chosen since it is infeasible
+            'price': self.default_price,
             'quantity': power_produced,
             'schedule': current_clock,
             'bidder': 'variable',

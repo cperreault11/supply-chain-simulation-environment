@@ -36,11 +36,9 @@ class SupplyChainEnvironment:
                  flexible_capacity = 30,
                  static_capacity = 20,
                  variable_capacity = 20,
-                 spg = 7,
-                 spb = 7,
-                 fpg = 10,
-                 fpb = 5,
-                 vpg = 4,
+                 static_price = 113,
+                 flexible_price = 45,
+                 variable_price = 40,
                  mean_demand = 25
                  ):       
 
@@ -63,11 +61,9 @@ class SupplyChainEnvironment:
                                            flexible_capacity = flexible_capacity,
                                            static_capacity = static_capacity,
                                            variable_capacity = variable_capacity,
-                                           spg = spg,
-                                           spb = spb,
-                                           fpg = fpg,
-                                           fpb = fpb,
-                                           vpg = vpg,
+                                           static_price = static_price,
+                                           flexible_price = flexible_price,
+                                           variable_price = variable_price,
                                            mean_demand = mean_demand)
                          for class_name in profile_config['metrics']]
 
@@ -87,11 +83,9 @@ class SupplyChainEnvironment:
                                            static_capacity = static_capacity,
                                            variable_capacity = variable_capacity,
                                            mean_demand = mean_demand,
-                                           spg = spg,
-                                           spb = spb,
-                                           fpg = fpg,
-                                           fpb = fpb,
-                                           vpg = vpg,)
+                                           static_price = static_price,
+                                           flexible_price = flexible_price,
+                                           variable_price = variable_price)
                          for class_name in profile_config['modules']]
 
         current_program_time = time.time()
