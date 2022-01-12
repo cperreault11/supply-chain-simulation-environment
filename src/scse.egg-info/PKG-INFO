@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 2.1
 Name: scse
 Version: 1.0
 Summary: UNKNOWN
@@ -6,5 +6,9 @@ Home-page: https://code.amazon.com/packages/SupplyChainSimulationEnvironment/tre
 Author: Supply Chain Optimization Technology
 Author-email: miniscot@amazon.com
 License: Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-Description: UNKNOWN
 Platform: UNKNOWN
+License-File: LICENSE
+License-File: NOTICE
+
+UNKNOWN
+

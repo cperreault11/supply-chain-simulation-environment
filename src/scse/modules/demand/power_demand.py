@@ -1,18 +1,34 @@
 import numpy as np
 from scse.api.module import Agent
 import scipy.stats
+import GPy
+import os
+
+class DemandModel():
+    def normalize_single_feature(arr, arr_min, arr_max):
+        return ((arr - arr_min)/(arr_max-arr_min))
+    
+    def __init__(self):
+        path = os.path.abspath("src/scse/modules/demand/demand-model.zip")
+        self.gpy_model = GPy.models.GPRegression.load_model(path)
+
+
+    def predict(self, date, previous_value):
+        day_of_week = normalize_single_feature(date.weekday(), 0, 6)
+        month = normalize_single_feature(date.month, 0, 11)
+        y = self.gpy_model.predict(np.array([month, day_of_week, previous_value / 15000.0]))
+        return y * 15000
 
 import logging
 logger = logging.getLogger(__name__)
 VAR = 5 # could set these with run params if we want
 class NormalPowerDemand(Agent):
-
-
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         self.mean = run_parameters['mean_demand']
         self.var = VAR
+        self.model = DemandModel()
     
     def get_name(self):
         return 'demand_generator'
@@ -44,3 +60,4 @@ class NormalPowerDemand(Agent):
         actions.append(action)
         
         return actions
+        
