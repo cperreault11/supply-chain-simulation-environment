@@ -3,6 +3,7 @@ from scse.api.module import Agent
 import scipy.stats
 import GPy
 import os
+from IPython import embed
 
 def normalize_single_feature(arr, arr_min, arr_max):
     return ((arr - arr_min)/(arr_max-arr_min))
@@ -16,9 +17,10 @@ class DemandModel():
         day_of_week = normalize_single_feature(date.weekday(), 0, 6)
         month = normalize_single_feature(date.month, 0, 11)
         x = np.array([month, day_of_week, previous_value / 15000.0])
+        #embed()
         X = np.array([x])
         y = self.gpy_model.predict(X)
-        return y[0][0] * 15000
+        return y[0][0][0] * 15000
 
 import logging
 logger = logging.getLogger(__name__)
