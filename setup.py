@@ -14,10 +14,8 @@ setup(
     # We could also call it miniscot, however I prefer keeping the name more (technically) precise.
     name="scse",
     version="1.0",
-    license=
-    'Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.',
-    url=
-    'https://code.amazon.com/packages/SupplyChainSimulationEnvironment/trees/mainline',
+    license='Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.',
+    url='https://code.amazon.com/packages/SupplyChainSimulationEnvironment/trees/mainline',
     author='Supply Chain Optimization Technology',
     author_email='miniscot@amazon.com',
 
@@ -41,11 +39,11 @@ setup(
     #    bin/SupplyChainSimulationEnvironment (which you can obviously change!) as a script
     #    that will call your main() function, above.
     #
-    #entry_points="""\
-    #[console_scripts]
-    #miniscot = scse.main.cli:main
-    #""",
-    entry_points={'console_scripts':['miniscot=scse.main.cli:main']},
+    # entry_points="""\
+    # [console_scripts]
+    # miniscot = scse.main.cli:main
+    # """,
+    entry_points={'console_scripts': ['miniscot=scse.main.cli:main']},
     #
     # 3. Uncomment the Python interpreter and Python-setuptools in the
     #   dependencies section of your Config. This is necessary to guarantee the
@@ -75,7 +73,7 @@ setup(
 
     # This is used for local deployment (outside of Brazil).
     # This needs to be updated manually as Config changes.
-    install_requires = [
+    install_requires=[
         'numpy == 1.*',
         'scipy == 1.*',
         'pandas == 0.24.*',
@@ -86,6 +84,9 @@ setup(
         'docker == 3.7.*',
         'requests == 2.*',
         'gym == 0.17.0',
+        'gpy == 1.10.*',
+        'matplotlib == 3.5.*',
+        'IPython == 7.31.*'
     ],
     setup_requires=[
         'pytest-runner',
