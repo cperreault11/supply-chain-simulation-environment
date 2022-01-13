@@ -2,10 +2,21 @@ from scse.api.module import Agent
 import numpy as np
 import scipy.stats
 import logging
-
+from supply_model import SupplyModel
 from scse.modules.buying.power_rest_of_market import DEFAULT_BACKUP_PRICE
 
 logger = logging.getLogger(__name__)
+
+
+def get_non_renewable_supply_model():
+    return SupplyModel(
+        model_name='supply-model-non-ren',
+        mean=0.418,
+        var=0.056,
+        offset=1557416.5,
+        scale=1357952.1
+    )
+
 
 class StaticFirm(Agent):
     """
@@ -15,11 +26,13 @@ class StaticFirm(Agent):
 
     DEFAULT_RAMP_UP_COST = 40
     DEFAULT_COST_PER_UNIT = 3
+
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
         self.capacity = run_parameters['static_capacity']
         self.default_price = run_parameters['static_price']
+        self.supply_model = get_non_renewable_supply_model()
 
     def get_name(self):
         return 'static_firm'
