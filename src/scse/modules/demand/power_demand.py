@@ -10,6 +10,8 @@ import datetime
 def normalize_single_feature(arr, arr_min, arr_max):
     return ((arr - arr_min)/(arr_max-arr_min))
 
+max_demand = 7000000.
+
 class DemandModel():
     def __init__(self):
         path = os.path.abspath("src/scse/modules/demand/demand-model.zip")
@@ -19,11 +21,11 @@ class DemandModel():
         day_of_week = normalize_single_feature(date.weekday(), 0, 6)
         _, week_of_year, _ = date.isocalendar() 
         week_of_year = normalize_single_feature(week_of_year, 1, 53)
-        x = np.array([week_of_year, day_of_week, previous_value / 7000000.0])
+        x = np.array([week_of_year, day_of_week, previous_value / max_demand])
         X = np.array([x])
         y = self.gpy_model.posterior_samples(X,size=1)[0][0][0]
         var = self.gpy_model.predict(X)[1][0]
-        return (y * 7000000, math.sqrt(var) * 7000000)
+        return (y * max_demand, math.sqrt(var) * max_demand)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -34,7 +36,7 @@ class NormalPowerDemand(Agent):
         self._rng = np.random.RandomState(simulation_seed)
         self.mean = run_parameters['mean_demand']
         self.var = VAR
-        self.previous_demand = np.random.normal(0.7, 0.1, 1)[0]
+        self.previous_demand = np.random.normal(0.7, 0.1, 1)[0]*max_demand
         self.demand_model = DemandModel()
 
     def get_name(self):
