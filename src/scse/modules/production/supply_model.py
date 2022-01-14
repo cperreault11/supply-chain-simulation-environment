@@ -1,12 +1,14 @@
 import GPy
-import os
+import pickle
+import numpy as np
 
 
 class SupplyModel():
 
     def __init__(self, model_name, mean=0.0, var=1.0, offset=0.0, scale=1.0):
-        self.model = GPy.models.GPRegression(
-            f'src/scse/modules/demand/{model_name}.zip')
+        model_file = f'src/scse/modules/production/{model_name}.pkl'
+        with open(model_file, 'rb') as file:
+            self.model = pickle.load(file)
         self.mean = mean
         self.var = var
         self.offset = offset
