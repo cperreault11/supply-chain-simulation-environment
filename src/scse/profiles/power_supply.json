@@ -1,11 +1,12 @@
 {
-    "name": "power_supply",
-    "description": "Environment for power supply market",
-    "modules": [
-      "scse.modules.production.flexible_firm.FlexibleFirm",
-      "scse.modules.production.static_firm.StaticFirm",
-      "scse.modules.production.variable_firm.VariableFirm",
-      "scse.modules.demand.power_demand.NormalPowerDemand"
-    ],
-    "metrics": ["scse.metrics.power_contract_profit.ProfitCalculations"]
-  }
+  "name": "power_supply",
+  "description": "Environment for power supply market",
+  "modules": [
+    "scse.modules.production.renewables_firm.RenewablesFirm",
+    "scse.modules.production.non_renewables_firm.NonRenewablesFirm",
+    "scse.modules.demand.power_demand.NormalPowerDemand"
+  ],
+  "metrics": [
+    "scse.metrics.power_contract_profit.ProfitCalculations"
+  ]
+}
