@@ -10,34 +10,20 @@ import datetime
 def normalize_single_feature(arr, arr_min, arr_max):
     return ((arr - arr_min)/(arr_max-arr_min))
 
-class DemandSim():
+class DemandModel():
     def __init__(self):
-        path = os.path.abspath("src/scse/modules/demand/demand-sim.zip")
-        self.gpy_model = GPy.models.GPRegression.load_model(path)
-
-    def predict(self, date):
-        day_of_week = normalize_single_feature(date.weekday(), 0, 6)
-        _, week_of_year, _ = date.isocalendar() 
-        week_of_year = normalize_single_feature(week_of_year, 1, 53)
-        x = np.array([week_of_year, day_of_week])
-        X = np.array([x])
-        y = self.gpy_model.posterior_samples(X, size=1)
-        return y[0][0][0] * 500000
-
-
-class DemandPred():
-    def __init__(self):
-        path = os.path.abspath("src/scse/modules/demand/demand-pred.zip")
+        path = os.path.abspath("src/scse/modules/demand/demand-model.zip")
         self.gpy_model = GPy.models.GPRegression.load_model(path)
 
     def predict(self, date, previous_value):
         day_of_week = normalize_single_feature(date.weekday(), 0, 6)
         _, week_of_year, _ = date.isocalendar() 
         week_of_year = normalize_single_feature(week_of_year, 1, 53)
-        x = np.array([week_of_year, day_of_week, previous_value / 500000.0])
+        x = np.array([week_of_year, day_of_week, previous_value / 7000000.0])
         X = np.array([x])
-        y = self.gpy_model.predict(X)
-        return (y[0][0][0] * 500000, math.sqrt(y[1][0][0]) * 500000)
+        y = self.gpy_model.posterior_samples(X,size=1)[0][0][0]
+        var = self.gpy_model.predict(X)[1][0]
+        return (y * 7000000, math.sqrt(var) * 7000000)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,8 +34,8 @@ class NormalPowerDemand(Agent):
         self._rng = np.random.RandomState(simulation_seed)
         self.mean = run_parameters['mean_demand']
         self.var = VAR
-        self.demand_pred = DemandPred()
-        self.demand_sim = DemandSim()
+        self.previous_demand = np.random.normal(0.7, 0.1, 1)[0]
+        self.demand_model = DemandModel()
 
     def get_name(self):
         return 'demand_generator'
@@ -58,10 +44,11 @@ class NormalPowerDemand(Agent):
         return None
 
     def compute_actions(self, state):
-        previous_date = state['date_time'] + datetime.timedelta(days=-1)
-        previous_demand = self.demand_sim.predict(previous_date)
-        demand, std_dev = self.demand_pred.predict(state['date_time'], previous_demand)
-       
+        demand, std_dev = self.demand_model.predict(state['date_time'], self.previous_demand)
+        self.previous_demand = demand
+
+        print("demand:"+str(demand))
+
         actions = []
         x = self._rng.rand()
         # truncated normal, can't have negative demand
@@ -70,18 +57,21 @@ class NormalPowerDemand(Agent):
         #sample = self._rng.rand()
         #demand =  scipy.stats.truncnorm((0 - mean) / var, np.inf, loc=mean, scale=var).ppf(sample) #self.mean + scipy.stats.norm.ppf(1 - x * (1 - scipy.stats.norm.cdf(-self.mean/self.var))) # TODO: switch to truncnorm
         #backup_required = 3 * np.sqrt(var) # 99% chance of having enough power with 3 standard deviations of backup power, 
+        
+        quantity = demand + 3*std_dev 
+
         action = { # most of these are unnecessary fillers leftover from newsvendor demo
             'type': 'market_demand',
             'asin': 1,
             'origin': None,
             'destination': None,
-            'quantity': demand + std_dev, 
+            'quantity': quantity, 
             'predicted': mean,
             'backup': 0,
             'schedule': state['clock'],
         }
-        logger.debug("Market bought {} (pred) + {} (stddev) = {} units of power".
-            format(demand, std_dev, demand + std_dev))
+        logger.debug("Market bought {} (pred) + 3x{} (stddev) = {} units of power".
+            format(demand, std_dev, quantity))
         #logger.debug("Market demanded {} units of backup power".format(backup_required))
         actions.append(action)
         
