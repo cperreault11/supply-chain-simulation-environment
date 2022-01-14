@@ -38,7 +38,7 @@ class StaticFirm(Agent):
 
     def compute_actions(self, state):
         current_clock = state['clock']
-        capacity = self.supply_model.predict(state['datetime'])
+        capacity = self.supply_model.predict(state['date_time'])
         action = {
             'type': 'bid',
             'price': self.default_price,

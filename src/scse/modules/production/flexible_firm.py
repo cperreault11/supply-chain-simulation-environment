@@ -36,7 +36,7 @@ class FlexibleFirm(Agent):
 
     def compute_actions(self, state):
         current_clock = state['clock']
-        capacity = self.supply_model.predict(state['datetime'])
+        capacity = self.supply_model.predict(state['date_time'])
         # if we want to incorporate strategy to these bids, 'quantity' can
         # be set to the maximum that the firm is willing to sell at either
         # guaranteed or backup power, set the other price to inf
