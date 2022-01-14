@@ -31,7 +31,7 @@ class NonRenewablesFirm(Agent):
         )
 
     def get_name(self):
-        return 'static_firm'
+        return 'non_renewables_firm'
 
     def reset(self, context, state):
         return None

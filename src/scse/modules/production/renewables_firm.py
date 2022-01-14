@@ -29,7 +29,7 @@ class RenewablesFirm(Agent):
         )
 
     def get_name(self):
-        return 'flexible_firm'
+        return 'renewables_firm'
 
     def reset(self, context, state):
         return None
