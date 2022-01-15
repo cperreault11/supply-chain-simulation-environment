@@ -281,9 +281,8 @@ class SupplyChainEnvironment:
         return state
 
     def _update_demand(self, state, action):
-        state['true_demand'] = action['quantity']
-        state['predicted_demand'] = action['predicted']
-        state['backup_required'] = action['backup']
+        state['true_demand'] = action['predicted']
+        state['demand_sd'] = action['sd']
         return state
 
     def _create_order_entity(self, state, action):

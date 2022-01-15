@@ -26,8 +26,8 @@ class NonRenewablesFirm(Agent):
             model_name='supply-model-non-ren',
             mean=0.418,
             var=0.056,
-            offset=1557416.5,
-            scale=1357952.1
+            offset=30,
+            scale=70
         )
 
     def get_name(self):
@@ -38,7 +38,7 @@ class NonRenewablesFirm(Agent):
 
     def compute_actions(self, state):
         current_clock = state['clock']
-        capacity = self.supply_model.predict(state['date_time'])
+        capacity = self.supply_model.predict(state['date_time'])[0]
         action = {
             'type': 'bid',
             'price': self.default_price,
@@ -48,6 +48,6 @@ class NonRenewablesFirm(Agent):
             # 'cost_pu': self.DEFAULT_COST_PER_UNIT,
             # 'ramup_cost': self.DEFAULT_RAMP_UP_COST,
         }
-        #logger.debug("static firm produced {} units of power".format(capacity))
+        logger.debug("static firm produced {} units of power".format(capacity))
         actions = [action]
         return actions

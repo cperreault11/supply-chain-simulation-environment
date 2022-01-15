@@ -10,7 +10,7 @@ import datetime
 def normalize_single_feature(arr, arr_min, arr_max):
     return ((arr - arr_min)/(arr_max-arr_min))
 
-max_demand = 7000000.
+max_demand = 300.
 
 class DemandModel():
     def __init__(self):
@@ -49,7 +49,7 @@ class NormalPowerDemand(Agent):
         demand, std_dev = self.demand_model.predict(state['date_time'], self.previous_demand)
         self.previous_demand = demand
 
-        print("demand:"+str(demand))
+        #print("demand:"+str(demand))
 
         actions = []
         x = self._rng.rand()
@@ -60,16 +60,16 @@ class NormalPowerDemand(Agent):
         #demand =  scipy.stats.truncnorm((0 - mean) / var, np.inf, loc=mean, scale=var).ppf(sample) #self.mean + scipy.stats.norm.ppf(1 - x * (1 - scipy.stats.norm.cdf(-self.mean/self.var))) # TODO: switch to truncnorm
         #backup_required = 3 * np.sqrt(var) # 99% chance of having enough power with 3 standard deviations of backup power, 
         
-        quantity = demand + 3*std_dev 
-
+        quantity = demand + 2*std_dev 
+        
         action = { # most of these are unnecessary fillers leftover from newsvendor demo
             'type': 'market_demand',
             'asin': 1,
             'origin': None,
             'destination': None,
-            'quantity': quantity, 
-            'predicted': mean,
-            'backup': 0,
+            'sd': std_dev, 
+            'predicted': demand,
+            'quantity': demand, 
             'schedule': state['clock'],
         }
         logger.debug("Market bought {} (pred) + 3x{} (stddev) = {} units of power".

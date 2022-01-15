@@ -22,4 +22,5 @@ class SupplyModel():
         input = np.array(
             [[date.weekday()/6.0, date.month/11.0, self.last_prediction]])
         self.last_prediction = self.model.posterior_samples(input, size=1)[0]
-        return self.last_prediction * self.scale + self.offset
+        v = self.model.predict(input)[1][0]
+        return self.last_prediction * self.scale + self.offset, v * self.scale
