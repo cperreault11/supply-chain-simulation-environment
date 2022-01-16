@@ -284,12 +284,11 @@ class SupplyChainEnvironment:
 
     def _update_demand(self, state, action):
         state['true_demand'] = action['quantity']
-        state['predicted_demand'] = action['predicted']
-        state['backup_required'] = action['backup']
         return state
 
     def _update_demand_at_price(self, state, action):
         state['demand_at_price'] = action
+        return state
 
     def _create_order_entity(self, state, action):
         # semantically, individual actions are singular (order, shipment), state semantics are plural (orders, shipments)

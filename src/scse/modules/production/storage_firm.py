@@ -14,26 +14,28 @@ class StorageFirm(Agent):
             self.capacity = run_parameters['storage_firm_capacity']
         else:
             self.capacity = 1000000
-        self.occupation = 0
 
     def get_name(self):
         return 'storage_firm'
 
     def reset(self, context, state):
-        None
+        state['storage_occupation'] = 0
 
     def compute_actions(self, state):
         actions = [{
             'type': 'bid',
             'price': 80,
-            'quantity': self.occupation,
+            'quantity': state['storage_occupation'],
             'schedule': state['clock'],
             'bidder': 'storage',
         },{   
             'type': 'market_demand_at_price',
-            'quantity': self.capacity - self.occupation, 
+            'quantity': self.capacity - state['storage_occupation'], 
             'price' : 60,
             'schedule': state['clock'],
         }]
 
+        logger.debug("Buy {} at {}, sell {} at {}".
+            format(actions[1]['quantity'], actions[1]['price'], 
+            actions[0]['quantity'], actions[0]['price']))
         return actions

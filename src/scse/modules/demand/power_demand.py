@@ -67,9 +67,7 @@ class NormalPowerDemand(Agent):
             'asin': 1,
             'origin': None,
             'destination': None,
-            'quantity': quantity, 
-            'predicted': mean,
-            'backup': 0,
+            'quantity': quantity,
             'schedule': state['clock'],
         }
         logger.debug("Market bought {} (pred) + 3x{} (stddev) = {} units of power".

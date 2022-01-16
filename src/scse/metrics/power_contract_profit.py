@@ -1,6 +1,8 @@
 import logging
 import scipy.optimize
 import numpy as np
+from IPython import embed
+
 logger = logging.getLogger(__name__)
 
 class ProfitCalculations():
@@ -12,15 +14,19 @@ class ProfitCalculations():
 
     def compute_reward(self, state, action):
         if action['type'] == 'advance_time':
-            total_demand = state['predicted_demand'] + state['backup_required']
+            total_demand = state['true_demand'] 
             remaining_demand = total_demand
             all_options = sorted([(bid['bidder'], bid['price'], bid['quantity']) for bid in state['bids']], key = lambda x: x[1]) # if calculating profit for each firm, can add cost per unit here as well
             bought = []
 
             for bid in all_options:
                 quantity = max(0,min(remaining_demand, bid[2]))
-                remaining_demand -= quantity
+                remaining_demand -= quantity                
                 bought.append((bid[0], bid[1], quantity))
+                
+                if bid[0] == 'storage':
+                    state['storage_occupation'] -= quantity
+
                 if remaining_demand == 0:
                     break
 
@@ -34,6 +40,7 @@ class ProfitCalculations():
 
                 quantity = max(0,min(remaining_demand, bid[2]))
                 remaining_demand -= quantity
+                state['storage_occupation'] += quantity
                 bought.append((bid[0], bid[1], quantity))
 
             total_cost = sum(x[1] * x[2] for x in bought)
