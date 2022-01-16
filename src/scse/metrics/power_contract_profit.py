@@ -31,20 +31,21 @@ class ProfitCalculations():
                     break
 
             # demand with price limit calculation 
-            remaining_demand = state['demand_at_price']['quantity']
+            remaining_demand_at_price = state['demand_at_price']['quantity']
             price_limit = state['demand_at_price']['price']
             
             for bid in all_options:
-                if remaining_demand == 0 or price_limit > bid[1]:
+                if remaining_demand_at_price == 0 or price_limit > bid[1]:
                     break
 
-                quantity = max(0,min(remaining_demand, bid[2]))
-                remaining_demand -= quantity
+                quantity = max(0,min(remaining_demand_at_price, bid[2]))
+                remaining_demand_at_price -= quantity
                 state['storage_occupation'] += quantity
                 bought.append((bid[0], bid[1], quantity))
 
             total_cost = sum(x[1] * x[2] for x in bought)
             logger.debug("Demand unfulfilled: {}".format(remaining_demand))
+            logger.debug("Demand at price unfulfilled: {}".format(remaining_demand_at_price))
             logger.debug("Average cost: {}".format(total_cost/state['true_demand']))
             # easy to calculate profit per producer as well if needed
             state['bids'] = []
