@@ -238,6 +238,8 @@ class SupplyChainEnvironment:
                 # we only compute rewards upon executing complete action forms
                 elif action['type'] == 'market_demand':
                     state = self._update_demand(state,action)
+                elif action['type'] == 'market_demand_at_price':
+                    state = self._update_demand_at_price(state,action)
                 elif action['type'] == 'bid':
                     state = self._add_bid(state,action)
                 elif action['type'] in ['inbound_shipment', 'outbound_shipment', 'transfer']:
@@ -285,6 +287,9 @@ class SupplyChainEnvironment:
         state['predicted_demand'] = action['predicted']
         state['backup_required'] = action['backup']
         return state
+
+    def _update_demand_at_price(self, state, action):
+        state['demand_at_price'] = action
 
     def _create_order_entity(self, state, action):
         # semantically, individual actions are singular (order, shipment), state semantics are plural (orders, shipments)
