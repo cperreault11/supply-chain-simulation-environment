@@ -68,7 +68,7 @@ class NormalPowerDemand(Agent):
             'origin': None,
             'destination': None,
             'quantity': quantity, 
-            'predicted': mean,
+            'predicted': quantity,
             'backup': 0,
             'schedule': state['clock'],
         }
