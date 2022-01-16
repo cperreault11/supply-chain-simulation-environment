@@ -9,7 +9,6 @@ class ProfitCalculations():
 
     def reset(self,context,state):
         state['bids'] = []
-        state['demand_at_price'] = None
 
     def compute_reward(self, state, action):
         if action['type'] == 'advance_time':
@@ -30,7 +29,7 @@ class ProfitCalculations():
             price_limit = state['demand_at_price']['price']
             
             for bid in all_options:
-                if remaining_demand == 0 or price_limit < bid[1]:
+                if remaining_demand == 0 or price_limit > bid[1]:
                     break
 
                 quantity = max(0,min(remaining_demand, bid[2]))
@@ -42,7 +41,6 @@ class ProfitCalculations():
             logger.debug("Average cost: {}".format(total_cost/state['true_demand']))
             # easy to calculate profit per producer as well if needed
             state['bids'] = []
-            state['demand_at_price'] = None
 
             return {
                 'total': total_cost,

@@ -4,8 +4,8 @@
   "modules": [
     "scse.modules.production.renewables_firm.RenewablesFirm",
     "scse.modules.production.non_renewables_firm.NonRenewablesFirm",
-    "scse.modules.production.storage_firm.StorageFirm",
-    "scse.modules.demand.power_demand.NormalPowerDemand"
+    "scse.modules.demand.power_demand.NormalPowerDemand",
+    "scse.modules.production.storage_firm.StorageFirm"
   ],
   "metrics": [
     "scse.metrics.power_contract_profit.ProfitCalculations"

@@ -1,6 +1,4 @@
 from scse.api.module import Agent
-import numpy as np
-import scipy.stats
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,7 +14,6 @@ class StorageFirm(Agent):
             self.capacity = run_parameters['storage_firm_capacity']
         else:
             self.capacity = 1000000
-        
         self.occupation = 0
 
     def get_name(self):
