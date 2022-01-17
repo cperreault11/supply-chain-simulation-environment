@@ -3,6 +3,8 @@ Naive Supply Chain environment/controller.
 """
 
 import logging
+
+from numpy import maximum
 import networkx as nx
 import datetime
 import time
@@ -33,13 +35,15 @@ class SupplyChainEnvironment:
                  time_increment = 'daily',  # timestep increment
                  time_horizon = 100,        # timestep horizon
                  asin_selection = 1,# how many / which asins to simulate
-                 flexible_capacity = 30,
-                 static_capacity = 20,
-                 variable_capacity = 20,
+                 flexible_capacity = 1500000,
+                 static_capacity = 5500000,
+                 renewable_offset = 500000,
+                 renewable_scale = 2500000,
                  static_price = 113,
                  flexible_price = 45,
                  variable_price = 40,
-                 mean_demand = 25
+                 max_demand = 7000000,
+                 extra_power = 2
                  ):       
 
         self._program_start_time = time.time()
@@ -60,11 +64,12 @@ class SupplyChainEnvironment:
                                            asin_selection = asin_selection,
                                            flexible_capacity = flexible_capacity,
                                            static_capacity = static_capacity,
-                                           variable_capacity = variable_capacity,
-                                           static_price = static_price,
+                                           renewable_offset = renewable_offset,
+                                           renewable_scale = renewable_scale,                                           static_price = static_price,
                                            flexible_price = flexible_price,
                                            variable_price = variable_price,
-                                           mean_demand = mean_demand)
+                                           max_demand = max_demand,
+                                           extra_power = extra_power)
                          for class_name in profile_config['metrics']]
 
         # TODO For now, only a single metric module is supported.
@@ -81,11 +86,12 @@ class SupplyChainEnvironment:
                                            asin_selection = asin_selection,
                                            flexible_capacity = flexible_capacity,
                                            static_capacity = static_capacity,
-                                           variable_capacity = variable_capacity,
-                                           mean_demand = mean_demand,
+                                           renewable_offset = renewable_offset,
+                                           renewable_scale = renewable_scale,                                           max_demand = max_demand,
                                            static_price = static_price,
                                            flexible_price = flexible_price,
-                                           variable_price = variable_price)
+                                           variable_price = variable_price,
+                                           extra_power = extra_power)
                          for class_name in profile_config['modules']]
 
         current_program_time = time.time()
@@ -281,9 +287,8 @@ class SupplyChainEnvironment:
         return state
 
     def _update_demand(self, state, action):
-        state['true_demand'] = action['quantity']
-        state['predicted_demand'] = action['predicted']
-        state['backup_required'] = action['backup']
+        state['true_demand'] = action['predicted']
+        state['demand_sd'] = action['sd']
         return state
 
     def _create_order_entity(self, state, action):

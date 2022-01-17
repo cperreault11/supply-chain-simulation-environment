@@ -7,11 +7,16 @@ class miniSCOTnotebook():
     DEFAULT_HORIZON = 100
     DEFAULT_SIMULATION_SEED = 12345
     DEFAULT_ASIN_SELECTION = 1
-    DEFAULT_PROFILE = 'newsvendor_demo_profile'
-    DEFAULT_FLEXIBLE_CAPACITY = 10
-    DEFAULT_STATIC_CAPACITY = 10
-    DEFAULT_VARIABLE_CAPACITY = 10
-    DEFAULT_MEAN_DEMAND = 25
+    DEFAULT_PROFILE = 'power_supply'
+    DEFAULT_FLEXIBLE_CAPACITY = 1500000
+    DEFAULT_STATIC_CAPACITY = 5500000
+    DEFAULT_RENEWABLE_OFFSET = 500000
+    DEFAULT_RENEWABLE_SCALE = 2500000
+    DEFAULT_STATIC_PRICE = 113
+    DEFAULT_FLEXIBLE_PRICE = 45
+    DEFAULT_VARIABLE_PRICE = 40
+    DEFAULT_MAX_DEMAND = 7000000
+    DEFAULT_EXTRA_POWER = 2
 
     def __init__(self):
         self.start(simulation_seed=self.DEFAULT_SIMULATION_SEED,
@@ -20,9 +25,14 @@ class miniSCOTnotebook():
                    time_horizon=self.DEFAULT_HORIZON,
                    asin_selection=self.DEFAULT_ASIN_SELECTION,
                    flexible_capacity = self.DEFAULT_FLEXIBLE_CAPACITY,
-                   variable_capacity = self.DEFAULT_VARIABLE_CAPACITY,
                    static_capacity = self.DEFAULT_STATIC_CAPACITY,
-                   mean_demand = self.DEFAULT_MEAN_DEMAND,
+                   renewable_offset = self.DEFAULT_RENEWABLE_OFFSET,
+                   renewable_scale = self.DEFAULT_RENEWABLE_SCALE,
+                   max_demand = self.DEFAULT_MAX_DEMAND,
+                   static_price = self.DEFAULT_STATIC_PRICE,
+                   flexible_price = self.DEFAULT_FLEXIBLE_PRICE,
+                   variable_price = self.DEFAULT_VARIABLE_PRICE,
+                   extra_power = self.DEFAULT_EXTRA_POWER,
                    profile=self.DEFAULT_PROFILE)
 
     def start(self, **run_parameters):

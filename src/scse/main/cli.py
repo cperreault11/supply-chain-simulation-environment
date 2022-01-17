@@ -13,13 +13,15 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
     _DEFAULT_SIMULATION_SEED = 12345
     _DEFAULT_ASIN_SELECTION = 1 # or use an integer value to select the number of asins
     _DEFAULT_PROFILE = 'power_supply'
-    _DEFAULT_FLEXIBLE_CAPACITY = 30
-    _DEFAULT_STATIC_CAPACITY = 20
-    _DEFAULT_VARIABLE_CAPACITY = 20
-    _DEFAULT_MEAN_DEMAND = 25
+    _DEFAULT_FLEXIBLE_CAPACITY = 1500000
+    _DEFAULT_STATIC_CAPACITY = 5500000
+    _DEFAULT_RENEWABLE_OFFSET = 500000
+    _DEFAULT_RENEWABLE_SCALE = 2500000
+    _DEFAULT_MAX_DEMAND = 7000000
     _DEFAULT_STATIC_PRICE = 113 # avg coal price US
     _DEFAULT_FLEXIBLE_PRICE = 45 # avg gas price US w/o carbon capture, 70 with
     _DEFAULT_VARIABLE_PRICE = 40 # avg solar price US: 43, avg onshore wind price US: 38
+    _DEFAULT_EXTRA_POWER = 2 # 
 
     def __init__(self, **args):
         super().__init__(args)
@@ -31,13 +33,15 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     time_horizon = self._DEFAULT_HORIZON,
                     asin_selection = self._DEFAULT_ASIN_SELECTION,
                     flexible_capacity = self._DEFAULT_FLEXIBLE_CAPACITY,
-                    variable_capacity = self._DEFAULT_VARIABLE_CAPACITY,
                     static_capacity = self._DEFAULT_STATIC_CAPACITY,
-                    mean_demand = self._DEFAULT_MEAN_DEMAND,
+                    max_demand = self._DEFAULT_MAX_DEMAND,
+                    renewable_offset = self._DEFAULT_RENEWABLE_OFFSET,
+                    renewable_scale = self._DEFAULT_RENEWABLE_SCALE,
                     profile = self._DEFAULT_PROFILE,
                     static_price = self._DEFAULT_STATIC_PRICE,
                     flexible_price = self._DEFAULT_FLEXIBLE_PRICE,
-                    variable_price = self._DEFAULT_VARIABLE_PRICE)
+                    variable_price = self._DEFAULT_VARIABLE_PRICE,
+                    extra_power = self._DEFAULT_EXTRA_POWER)
 
         self._set_prompt()
 
@@ -67,11 +71,14 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
     param_parser.add_argument('-profile', help="profile (default minimal)", type=str, default=_DEFAULT_PROFILE)
     param_parser.add_argument('-flexible_capacity', help="capacity of the flexible power producers", type=int, default=_DEFAULT_FLEXIBLE_CAPACITY)
     param_parser.add_argument('-static_capacity', help="capacity of the static power producers", type=int, default=_DEFAULT_STATIC_CAPACITY)
-    param_parser.add_argument('-variable_capacity', help="capacity of the variable power producers", type=int, default=_DEFAULT_VARIABLE_CAPACITY)
-    param_parser.add_argument('-mean_demand', help="average demand in this market", type=int, default=_DEFAULT_MEAN_DEMAND)
+    param_parser.add_argument('-max_demand', help="average demand in this market", type=int, default=_DEFAULT_MAX_DEMAND)
     param_parser.add_argument('-static_price', help="static price (e.g. coal)", type=int, default = _DEFAULT_STATIC_PRICE)
     param_parser.add_argument('-flexible_price', help="flexible price (e.g. gas)", type=int, default = _DEFAULT_FLEXIBLE_PRICE)
     param_parser.add_argument('-variable_price', help="variable price (e.g. renewables)", type=int, default = _DEFAULT_VARIABLE_PRICE)
+    param_parser.add_argument('-renewable_offset', help="renewable offset", type=float, default=_DEFAULT_RENEWABLE_OFFSET)
+    param_parser.add_argument('-renewable_scale', help="renewable scale", type=float, default=_DEFAULT_RENEWABLE_SCALE)
+    param_parser.add_argument('-extra_power', help="extra power for backup", type=float, default=_DEFAULT_EXTRA_POWER)
+
 
     #param_parser.add_argument('-asin', help="list of ASINs.", action='append', default=_DEFAULT_ASIN_LIST)
 
@@ -85,11 +92,13 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     asin_selection = args.asin_selection,
                     flexible_capacity = args.flexible_capacity,
                     static_capacity = args.static_capacity,
-                    variable_capacity = args.variable_capacity,
-                    mean_demand = args.mean_demand,
+                    max_demand = args.max_demand,
                     static_price = args.static_price,
                     flexible_price = args.flexible_price,
                     variable_price = args.variable_price,
+                    renewable_offset = args.renewable_offset,
+                    renewable_scale = args.renewable_scale,
+                    extra_power = args.extra_power,
                     profile = args.profile)
 
     def do_next(self, arguments):

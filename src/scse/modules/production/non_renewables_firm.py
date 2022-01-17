@@ -26,8 +26,8 @@ class NonRenewablesFirm(Agent):
             model_name='supply-model-non-ren',
             mean=0.418,
             var=0.056,
-            offset=1557416.5,
-            scale=1357952.1
+            offset=30,
+            scale=70
         )
         self.bid_amount = 3
         self.bid_percent_increase = 0.1

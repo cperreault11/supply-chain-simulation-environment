@@ -23,4 +23,7 @@ class SupplyModel():
             [[date.timetuple().tm_yday, date.weekday()/6.0, self.last_prediction]])
         self.last_prediction = \
             self.model.posterior_samples(input, size=1)[0][0][0]
-        return self.last_prediction * self.scale + self.offset
+        while self.last_prediction * self.scale + self.offset < 0: # resample to avoid negative values. shouldn't occur too often
+            self.last_prediction = \
+                self.model.posterior_samples(input, size=1)[0][0][0]
+        return self.last_prediction * self.scale + self.offset, np.sqrt(self.model.predict(input)[1])[0][0] * self.scale
