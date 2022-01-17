@@ -18,7 +18,7 @@ class RenewablesFirm(Agent):
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
         self._rng = np.random.RandomState(simulation_seed)
-        self.capacity = run_parameters['variable_capacity']
+      #self.capacity = run_parameters['variable_capacity']
         self.default_price = run_parameters['variable_price']
         self.supply_model = SupplyModel(
             model_name='supply-model-ren',
@@ -45,7 +45,7 @@ class RenewablesFirm(Agent):
 
     def compute_actions(self, state):
         current_clock = state['clock']
-        capacity,var = self.supply_model.predict(state['date_time'])
+        capacity,sd = self.supply_model.predict(state['date_time'])
         # if we want to incorporate strategy to these bids, 'quantity' can
         # be set to the maximum that the firm is willing to sell at either
         # guaranteed or backup power, set the other price to inf
@@ -54,11 +54,12 @@ class RenewablesFirm(Agent):
             'price': self.get_bid_price(bid_number),
             'quantity': capacity / self.bid_amount,
             'schedule': current_clock,
-            'bidder': 'flexible',
+            'bidder': 'renewable',
+            'sd':sd
             # 'rampup_cost': self.DEFAULT_RAMP_UP_COST,
             # 'cost_pu': self.DEFAULT_COST_PER_UNIT
         } for bid_number in range(self.bid_amount)]
-        logger.debug(f'{self.get_name()} produced {capacity} MW')
-        prices = [bid['price'] for bid in actions]
-        logger.debug(f'Bid prices: {prices}')
+        logger.debug(f'{self.get_name()} produced {capacity} MW, sd {sd}')
+        #prices = [bid['price'] for bid in actions]
+        #logger.debug(f'Bid prices: {prices}')
         return actions
