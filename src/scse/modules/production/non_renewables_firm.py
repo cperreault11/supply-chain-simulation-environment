@@ -14,8 +14,8 @@ class NonRenewablesFirm(Agent):
     More predictable output, higher cost per MW.
     """
 
-    DEFAULT_RAMP_UP_COST = 40
-    DEFAULT_COST_PER_UNIT = 3
+    # DEFAULT_RAMP_UP_COST = 40
+    # DEFAULT_COST_PER_UNIT = 3
 
     def __init__(self, run_parameters):
         simulation_seed = run_parameters['simulation_seed']
@@ -29,6 +29,8 @@ class NonRenewablesFirm(Agent):
             offset=30,
             scale=70
         )
+        self.bid_amount = 3
+        self.bid_percent_increase = 0.1
 
     def get_name(self):
         return 'non_renewables_firm'
@@ -36,18 +38,25 @@ class NonRenewablesFirm(Agent):
     def reset(self, context, state):
         return None
 
+    def get_bid_price(self, bid_number):
+        bid_factor = self.bid_percent_increase * \
+            ((bid_number - self.bid_amount//2) +
+             (bid_number >= self.bid_amount//2 and not self.bid_amount % 2))
+        return self.default_price * (1 + bid_factor)
+
     def compute_actions(self, state):
         current_clock = state['clock']
-        capacity = self.supply_model.predict(state['date_time'])[0]
-        action = {
+        capacity = self.supply_model.predict(state['date_time'])
+        actions = [{
             'type': 'bid',
-            'price': self.default_price,
-            'quantity': capacity,
+            'price': self.get_bid_price(bid_number),
+            'quantity': capacity / self.bid_amount,
             'schedule': current_clock,
-            'bidder': 'static',
-            # 'cost_pu': self.DEFAULT_COST_PER_UNIT,
-            # 'ramup_cost': self.DEFAULT_RAMP_UP_COST,
-        }
-        logger.debug("static firm produced {} units of power".format(capacity))
-        actions = [action]
+            'bidder': 'flexible',
+            # 'rampup_cost': self.DEFAULT_RAMP_UP_COST,
+            # 'cost_pu': self.DEFAULT_COST_PER_UNIT
+        } for bid_number in range(self.bid_amount)]
+        logger.debug(f'{self.get_name()} produced {capacity} MW')
+        prices = [bid['price'] for bid in actions]
+        logger.debug(f'Bid prices: {prices}')
         return actions
