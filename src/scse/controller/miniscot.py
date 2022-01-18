@@ -43,7 +43,8 @@ class SupplyChainEnvironment:
                  flexible_price = 45,
                  variable_price = 40,
                  max_demand = 7000000,
-                 extra_power = 2
+                 extra_power = 2,
+                 storage_firm_capacity = 0
                  ):       
 
         self._program_start_time = time.time()
@@ -69,7 +70,8 @@ class SupplyChainEnvironment:
                                            flexible_price = flexible_price,
                                            variable_price = variable_price,
                                            max_demand = max_demand,
-                                           extra_power = extra_power)
+                                           extra_power = extra_power,
+                                           storage_firm_capacity = storage_firm_capacity)
                          for class_name in profile_config['metrics']]
 
         # TODO For now, only a single metric module is supported.
@@ -91,6 +93,7 @@ class SupplyChainEnvironment:
                                            static_price = static_price,
                                            flexible_price = flexible_price,
                                            variable_price = variable_price,
+                                           storage_firm_capacity = storage_firm_capacity,
                                            extra_power = extra_power)
                          for class_name in profile_config['modules']]
 
@@ -244,6 +247,8 @@ class SupplyChainEnvironment:
                 # we only compute rewards upon executing complete action forms
                 elif action['type'] == 'market_demand':
                     state = self._update_demand(state,action)
+                elif action['type'] == 'market_demand_at_price':
+                    state = self._update_demand_at_price(state,action)
                 elif action['type'] == 'bid':
                     state = self._add_bid(state,action)
                 elif action['type'] in ['inbound_shipment', 'outbound_shipment', 'transfer']:
@@ -289,6 +294,11 @@ class SupplyChainEnvironment:
     def _update_demand(self, state, action):
         state['true_demand'] = action['predicted']
         state['demand_sd'] = action['sd']
+        return state
+
+
+    def _update_demand_at_price(self, state, action):
+        state['demand_at_price'] = action
         return state
 
     def _create_order_entity(self, state, action):

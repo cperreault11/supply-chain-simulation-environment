@@ -50,7 +50,7 @@ class NormalPowerDemand(Agent):
         demand, std_dev = self.demand_model.predict(state['date_time'], self.previous_demand)
         self.previous_demand = demand
 
-        #print("demand:"+str(demand))
+        logger.debug("demand: " + str(demand) + ", std_dev: " + str(std_dev))
 
         actions = []
         x = self._rng.rand()

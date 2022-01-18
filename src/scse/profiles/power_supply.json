@@ -5,7 +5,8 @@
     "scse.modules.production.renewables_firm.RenewablesFirm",
     "scse.modules.production.cheap_ramp_firm.CheapRampFirm",
     "scse.modules.production.expensive_ramp_firm.ExpensiveRampFirm",
-    "scse.modules.demand.power_demand.NormalPowerDemand"
+    "scse.modules.demand.power_demand.NormalPowerDemand",
+    "scse.modules.production.storage.StorageFirm"
   ],
   "metrics": [
     "scse.metrics.power_contract_profit.ProfitCalculations"

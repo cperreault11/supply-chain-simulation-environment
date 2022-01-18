@@ -29,6 +29,7 @@ class miniSCOTnotebook():
                    renewable_offset = self.DEFAULT_RENEWABLE_OFFSET,
                    renewable_scale = self.DEFAULT_RENEWABLE_SCALE,
                    max_demand = self.DEFAULT_MAX_DEMAND,
+                   storage_firm_capacity = 0,
                    static_price = self.DEFAULT_STATIC_PRICE,
                    flexible_price = self.DEFAULT_FLEXIBLE_PRICE,
                    variable_price = self.DEFAULT_VARIABLE_PRICE,

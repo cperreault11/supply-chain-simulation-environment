@@ -27,6 +27,8 @@ class RenewablesFirm(Agent):
             offset=run_parameters['renewable_offset'],
             scale=run_parameters['renewable_scale']
             )
+        logger.debug("renewable offset: "+(str(run_parameters['renewable_offset'])))
+        logger.debug("renewable scale: "+(str(run_parameters['renewable_scale'])))
         self.bid_amount = 3
         self.bid_percent_increase = 0.1
 
@@ -55,7 +57,7 @@ class RenewablesFirm(Agent):
             'quantity': capacity / self.bid_amount,
             'schedule': current_clock,
             'bidder': 'renewable',
-            'sd':sd
+            'sd':0
             # 'rampup_cost': self.DEFAULT_RAMP_UP_COST,
             # 'cost_pu': self.DEFAULT_COST_PER_UNIT
         } for bid_number in range(self.bid_amount)]

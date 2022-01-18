@@ -41,7 +41,9 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     static_price = self._DEFAULT_STATIC_PRICE,
                     flexible_price = self._DEFAULT_FLEXIBLE_PRICE,
                     variable_price = self._DEFAULT_VARIABLE_PRICE,
-                    extra_power = self._DEFAULT_EXTRA_POWER)
+                    extra_power = self._DEFAULT_EXTRA_POWER,
+                    storage_firm_capacity = 0
+                    )
 
         self._set_prompt()
 
@@ -78,7 +80,7 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
     param_parser.add_argument('-renewable_offset', help="renewable offset", type=float, default=_DEFAULT_RENEWABLE_OFFSET)
     param_parser.add_argument('-renewable_scale', help="renewable scale", type=float, default=_DEFAULT_RENEWABLE_SCALE)
     param_parser.add_argument('-extra_power', help="extra power for backup", type=float, default=_DEFAULT_EXTRA_POWER)
-
+    param_parser.add_argument('-storage_firm_capacity', type=float, default=0)
 
     #param_parser.add_argument('-asin', help="list of ASINs.", action='append', default=_DEFAULT_ASIN_LIST)
 
@@ -99,6 +101,7 @@ class MiniSCOTDebuggerApp(cmd2.Cmd):
                     renewable_offset = args.renewable_offset,
                     renewable_scale = args.renewable_scale,
                     extra_power = args.extra_power,
+                    storage_firm_capacity = args.storage_firm_capacity,
                     profile = args.profile)
 
     def do_next(self, arguments):
