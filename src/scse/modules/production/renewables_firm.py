@@ -55,7 +55,7 @@ class RenewablesFirm(Agent):
             'quantity': capacity / self.bid_amount,
             'schedule': current_clock,
             'bidder': 'renewable',
-            'sd':sd
+            'sd':sd / self.bid_amount
             # 'rampup_cost': self.DEFAULT_RAMP_UP_COST,
             # 'cost_pu': self.DEFAULT_COST_PER_UNIT
         } for bid_number in range(self.bid_amount)]
